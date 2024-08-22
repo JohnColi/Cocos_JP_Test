@@ -1,0 +1,17 @@
+info face="Arial Black" size=238 bold=1 italic=0 charset="" unicode=0 stretchH=100 smooth=1 padding=0,0,0,0 spacing=1,1
+common lineHeight=238 base=238 scaleW=825 scaleH=481 pages=1 packed=0
+page id=0 file="JP_Font.png"
+chars count=12
+char id=44 x=2 y=2 width=136 height=238 xoffset=-34 yoffset=0 xadvance=64 page=0 chnl=0 letter=","
+char id=48 x=139 y=2 width=136 height=238 xoffset=-1 yoffset=36 xadvance=133 page=0 chnl=0 letter="0"
+char id=49 x=276 y=2 width=136 height=238 xoffset=-9 yoffset=38 xadvance=101 page=0 chnl=0 letter="1"
+char id=50 x=413 y=2 width=136 height=238 xoffset=0 yoffset=38 xadvance=136 page=0 chnl=0 letter="2"
+char id=51 x=550 y=2 width=136 height=238 xoffset=0 yoffset=36 xadvance=136 page=0 chnl=0 letter="3"
+char id=52 x=687 y=2 width=136 height=238 xoffset=0 yoffset=39 xadvance=136 page=0 chnl=0 letter="4"
+char id=53 x=2 y=241 width=136 height=238 xoffset=0 yoffset=36 xadvance=136 page=0 chnl=0 letter="5"
+char id=54 x=139 y=241 width=136 height=238 xoffset=0 yoffset=36 xadvance=136 page=0 chnl=0 letter="6"
+char id=55 x=276 y=241 width=136 height=238 xoffset=-1 yoffset=38 xadvance=135 page=0 chnl=0 letter="7"
+char id=56 x=413 y=241 width=136 height=238 xoffset=0 yoffset=36 xadvance=135 page=0 chnl=0 letter="8"
+char id=57 x=550 y=241 width=136 height=238 xoffset=0 yoffset=36 xadvance=136 page=0 chnl=0 letter="9"
+char id=46 x=687 y=241 width=136 height=238 xoffset=-36 yoffset=36 xadvance=62 page=0 chnl=0 letter="."
+kernings count=0

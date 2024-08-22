@@ -1,0 +1,489 @@
+
+EmagineJackpot.png
+size: 4096,4096
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+AmountReel
+  rotate: false
+  xy: 8, 335
+  size: 2318, 336
+  orig: 2318, 336
+  offset: 0, 0
+  index: -1
+ChainA
+  rotate: false
+  xy: 1840, 1990
+  size: 495, 631
+  orig: 495, 631
+  offset: 0, 0
+  index: -1
+ChainB
+  rotate: false
+  xy: 3519, 3358
+  size: 397, 251
+  orig: 397, 251
+  offset: 0, 0
+  index: -1
+ChestBottom
+  rotate: false
+  xy: 8, 1785
+  size: 1824, 836
+  orig: 1824, 836
+  offset: 0, 0
+  index: -1
+ChestCover
+  rotate: false
+  xy: 8, 1184
+  size: 1966, 593
+  orig: 1966, 593
+  offset: 0, 0
+  index: -1
+ChestCoverBack
+  rotate: false
+  xy: 8, 679
+  size: 1828, 497
+  orig: 1828, 497
+  offset: 0, 0
+  index: -1
+Cloud
+  rotate: false
+  xy: 2969, 3327
+  size: 542, 282
+  orig: 542, 282
+  offset: 0, 0
+  index: -1
+Coins
+  rotate: false
+  xy: 8, 8
+  size: 2316, 319
+  orig: 2316, 319
+  offset: 0, 0
+  index: -1
+DiamondRotation_1
+  rotate: false
+  xy: 3541, 3188
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_2
+  rotate: false
+  xy: 3541, 3018
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_3
+  rotate: true
+  xy: 3388, 2669
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_4
+  rotate: true
+  xy: 2052, 724
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_5
+  rotate: false
+  xy: 2553, 1852
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_6
+  rotate: false
+  xy: 2531, 1682
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_7
+  rotate: true
+  xy: 2845, 2055
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+DiamondRotation_8
+  rotate: false
+  xy: 2237, 1541
+  size: 240, 162
+  orig: 240, 162
+  offset: 0, 0
+  index: -1
+Lock2a
+  rotate: false
+  xy: 2969, 3617
+  size: 924, 142
+  orig: 924, 142
+  offset: 0, 0
+  index: -1
+Lock2c
+  rotate: false
+  xy: 2969, 3767
+  size: 996, 302
+  orig: 996, 302
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_01
+  rotate: true
+  xy: 3789, 2979
+  size: 120, 143
+  orig: 120, 143
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_02
+  rotate: true
+  xy: 2217, 1129
+  size: 130, 146
+  orig: 130, 146
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_03
+  rotate: false
+  xy: 3901, 3617
+  size: 112, 142
+  orig: 112, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_04
+  rotate: false
+  xy: 2222, 825
+  size: 127, 146
+  orig: 127, 146
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_05
+  rotate: true
+  xy: 2222, 696
+  size: 121, 142
+  orig: 121, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_06
+  rotate: false
+  xy: 2206, 979
+  size: 132, 142
+  orig: 132, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_07
+  rotate: true
+  xy: 3931, 3123
+  size: 112, 142
+  orig: 112, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_08
+  rotate: false
+  xy: 3940, 2971
+  size: 112, 144
+  orig: 112, 144
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_09
+  rotate: false
+  xy: 3558, 2659
+  size: 103, 142
+  orig: 103, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_12
+  rotate: true
+  xy: 3924, 3396
+  size: 51, 142
+  orig: 51, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_14
+  rotate: false
+  xy: 3558, 2809
+  size: 112, 142
+  orig: 112, 142
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_15
+  rotate: false
+  xy: 3931, 3243
+  size: 113, 145
+  orig: 113, 145
+  offset: 0, 0
+  index: -1
+Txt_Congratulation_16
+  rotate: true
+  xy: 3541, 2959
+  size: 51, 142
+  orig: 51, 142
+  offset: 0, 0
+  index: -1
+WinBackDecoration
+  rotate: true
+  xy: 2576, 2303
+  size: 1766, 349
+  orig: 1766, 349
+  offset: 0, 0
+  index: -1
+bg
+  rotate: false
+  xy: 8, 2629
+  size: 2560, 1440
+  orig: 2560, 1440
+  offset: 0, 0
+  index: -1
+bg2
+  rotate: true
+  xy: 1844, 920
+  size: 256, 144
+  orig: 256, 144
+  offset: 0, 0
+  index: -1
+coin-grand_enus_0
+  rotate: false
+  xy: 3546, 2551
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_1
+  rotate: false
+  xy: 2801, 1914
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_10
+  rotate: true
+  xy: 2371, 1108
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_2
+  rotate: false
+  xy: 2908, 1947
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_3
+  rotate: false
+  xy: 2801, 1806
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_4
+  rotate: false
+  xy: 2908, 1839
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_5
+  rotate: false
+  xy: 2779, 1698
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_6
+  rotate: false
+  xy: 2788, 1590
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_7
+  rotate: false
+  xy: 2788, 1482
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_8
+  rotate: false
+  xy: 2381, 1323
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+coin-grand_enus_9
+  rotate: false
+  xy: 2381, 1215
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+fx_Glow_Singal
+  rotate: false
+  xy: 2969, 2914
+  size: 406, 405
+  orig: 406, 405
+  offset: 0, 0
+  index: -1
+fx_Tickle
+  rotate: false
+  xy: 2322, 1711
+  size: 201, 201
+  orig: 201, 201
+  offset: 0, 0
+  index: -1
+fx_exp
+  rotate: false
+  xy: 2058, 1726
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+txtWinner1
+  rotate: false
+  xy: 2554, 2022
+  size: 283, 273
+  orig: 283, 273
+  offset: 0, 0
+  index: -1
+txtWinner2
+  rotate: false
+  xy: 3383, 3074
+  size: 150, 245
+  orig: 150, 245
+  offset: 0, 0
+  index: -1
+txtWinner3
+  rotate: false
+  xy: 1982, 1212
+  size: 227, 247
+  orig: 227, 247
+  offset: 0, 0
+  index: -1
+txtWinner4
+  rotate: false
+  xy: 2343, 2382
+  size: 215, 239
+  orig: 215, 239
+  offset: 0, 0
+  index: -1
+txtWinner5
+  rotate: false
+  xy: 2343, 2126
+  size: 203, 248
+  orig: 203, 248
+  offset: 0, 0
+  index: -1
+txtWinner6
+  rotate: false
+  xy: 1982, 1467
+  size: 247, 251
+  orig: 247, 251
+  offset: 0, 0
+  index: -1
+txtWinner7
+  rotate: false
+  xy: 3789, 3107
+  size: 134, 243
+  orig: 134, 243
+  offset: 0, 0
+  index: -1
+txt_EmagineA
+  rotate: false
+  xy: 1844, 710
+  size: 200, 202
+  orig: 200, 202
+  offset: 0, 0
+  index: -1
+txt_EmagineE1
+  rotate: true
+  xy: 2969, 2607
+  size: 299, 411
+  orig: 299, 411
+  offset: 0, 0
+  index: -1
+txt_EmagineG
+  rotate: true
+  xy: 1840, 1786
+  size: 196, 210
+  orig: 196, 210
+  offset: 0, 0
+  index: -1
+txt_EmagineI
+  rotate: false
+  xy: 3973, 3867
+  size: 101, 202
+  orig: 101, 202
+  offset: 0, 0
+  index: -1
+txt_EmagineM
+  rotate: true
+  xy: 1996, 972
+  size: 232, 202
+  orig: 232, 202
+  offset: 0, 0
+  index: -1
+txt_EmagineN
+  rotate: true
+  xy: 2343, 1920
+  size: 198, 202
+  orig: 198, 202
+  offset: 0, 0
+  index: -1
+txt_Jackpot_A
+  rotate: false
+  xy: 2485, 1524
+  size: 155, 150
+  orig: 155, 150
+  offset: 0, 0
+  index: -1
+txt_Jackpot_C
+  rotate: false
+  xy: 2648, 1518
+  size: 132, 156
+  orig: 132, 156
+  offset: 0, 0
+  index: -1
+txt_Jackpot_J
+  rotate: true
+  xy: 2237, 1431
+  size: 102, 177
+  orig: 102, 177
+  offset: 0, 0
+  index: -1
+txt_Jackpot_K
+  rotate: true
+  xy: 3924, 3455
+  size: 154, 150
+  orig: 154, 150
+  offset: 0, 0
+  index: -1
+txt_Jackpot_O
+  rotate: false
+  xy: 2217, 1267
+  size: 156, 156
+  orig: 156, 156
+  offset: 0, 0
+  index: -1
+txt_Jackpot_P
+  rotate: true
+  xy: 3388, 2538
+  size: 123, 150
+  orig: 123, 150
+  offset: 0, 0
+  index: -1
+txt_Jackpot_T
+  rotate: true
+  xy: 3383, 2917
+  size: 149, 150
+  orig: 149, 150
+  offset: 0, 0
+  index: -1
+txt_Line
+  rotate: true
+  xy: 2933, 2581
+  size: 1488, 28
+  orig: 1488, 28
+  offset: 0, 0
+  index: -1
