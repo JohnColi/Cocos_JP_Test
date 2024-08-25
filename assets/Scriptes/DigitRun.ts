@@ -1,12 +1,11 @@
 import { _decorator, Component, Node, Sprite, UITransform, Vec2, Vec3 } from 'cc';
 import { NumberManager, eNumber } from './NumberManager';
-import { tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('DigitRun')
 export class DigitRun extends Component {
-
-    digits: { node: Node, sp: Sprite, pos_i: number, cur_n }[] = [];
+    @property({ step: 1 }) id: number = 0;
+    digits: { node: Node, sp: Sprite }[] = [];
     curent_n = 0;
     target_n = 0
     manager: NumberManager;
@@ -14,15 +13,19 @@ export class DigitRun extends Component {
     h = 238;
     runState = eRunState.Idle;
     /**中間的圖片index */ index = 1;
+    isCarryMode = false;
     speed_slow = 100;
     speed_fast = 2000;
-    speed_next = 2000; //1000
+    speed_next = 1000; //1000
     speed_creator = 2000; //1000
 
     /**已換圖的次數 */ runnedTimes = 0;
     needRunTimes = 0;
+
     isDebugMode = false;
-    completeCall: Function = null;
+    completeCallback: Function = null;
+    carryCallback: Function = null;
+    checkCallback: Function;
 
     start() {
         this.Init();
@@ -32,21 +35,26 @@ export class DigitRun extends Component {
             window.digitTest.nextNumber = this.nextNumber.bind(this);
             window.digitTest.initNumber = this.initNumber.bind(this);
             window.digitTest.toTargetNumber = this.toTargetNumber.bind(this);
+            window.digitTest.fastRunNumber = this.fastRunNumber.bind(this);
+            window.digitTest.slowRunNumber = this.slowRunNumber.bind(this);
 
             window.digitTest.functionTest = this.functionTest.bind(this);
+            for (let i = 0; i < this.digits.length; i++) {
+                this.digits[i].node.children[0].active = true;
+            }
         }
     }
 
     protected update(dt: number): void {
 
         if (this.runState == eRunState.Slow) {
-            this.moveFunction(this.speed_slow, dt);
+            this.moveFunction(this.speed_slow, dt, this.needRunTimes);
+        }
+        else if (this.runState == eRunState.Fast) {
+            this.moveFunction(this.speed_fast, dt, this.needRunTimes);
         }
         else if (this.runState == eRunState.Next) {
             this.moveFunction(this.speed_next, dt, this.needRunTimes);
-        }
-        else if (this.runState == eRunState.Fast) {
-            this.moveFunction(this.speed_fast, dt);
         }
         else if (this.runState == eRunState.Creator) {
             this.moveFunction(this.speed_creator, dt, 1);
@@ -60,10 +68,26 @@ export class DigitRun extends Component {
             for (let i = 0; i < childer.length; i++) {
                 let _n = childer[i];
                 let _s = _n.getComponent(Sprite);
-                let pos_i = i;
-                let cur_n = (2 + 9) % 10;
-                this.digits.push({ node: _n, sp: _s, pos_i: pos_i, cur_n: cur_n });
+                // let pos_i = i;
+                // let cur_n = (2 + 9) % 10;
+                this.digits.push({ node: _n, sp: _s });
             }
+        }
+    }
+
+    reset2Zero() {
+        this.target_n = 0;
+        this.curent_n = 0;
+        this.index = 1;
+        this.digits[0].sp.spriteFrame = null;
+        this.digits[1].sp.spriteFrame = null;
+        this.digits[2].sp.spriteFrame = this.manager.number_spf[1];
+
+        for (let i = 0; i < this.digits.length; i++) {
+            let _d = this.digits[i].node
+            let pos = new Vec3(_d.position);
+            pos.y = this.h * (1 - i);
+            _d.position = pos;
         }
     }
 
@@ -76,7 +100,7 @@ export class DigitRun extends Component {
         console.log(_s);
     }
 
-    moveFunction(_speed: number, dt: number, _times: number = 0) {
+    moveFunction(_speed: number, dt: number, _times: number = Number.MAX_VALUE) {
         let needMove_i = -1;
         for (let i = 0; i < this.digits.length; i++) {
             let pos = new Vec3(this.digits[i].node.position);
@@ -90,18 +114,14 @@ export class DigitRun extends Component {
 
         if (needMove_i > -1) {
             if (this.runnedTimes >= _times) {
-                console.log("執行結束:", this.curent_n, "  index:", this.index);
-                for (let i = 0; i < this.digits.length; i++) {
-                    let i_arr = this.newIndices();
-                    let _d = this.digits[i_arr[i]].node
-                    // console.log("dig:", _d.name);
-                    let pos = new Vec3(_d.position);
-                    pos.y = this.h * (-1 + i);
-                    _d.position = pos;
-                }
+                // console.log("執行結束:", this.curent_n, "  index:", this.index);
+                this.stopRunning();
                 this.runState = eRunState.Idle;
-                if (this.completeCall)
-                    this.completeCall();
+                // this.runnedTimes = 0;
+                if (this.completeCallback) {
+                    this.completeCallback();
+                    this.completeCallback = null;
+                }
                 return;
             }
 
@@ -116,10 +136,34 @@ export class DigitRun extends Component {
             // 剛開始轉就會換圖 第一次要跳過
             this.runnedTimes++;
             this.curent_n++;
-            this.curent_n = this.curent_n > 9 ? this.curent_n % 10 : this.curent_n;
+
+
+            if (this.isCarryMode && this.curent_n >= 10) {
+                if (this.carryCallback) {
+                    // console.log(this.node.name, " 進位");
+                    this.carryCallback();
+                }
+            }
+
             this.index = (this.index + 1) % 3;
+            this.curent_n = this.curent_n > 9 ? this.curent_n % 10 : this.curent_n;
             // console.log("number:", this.curent_n, " runTimes:", this.runnedTimes, " index:", this.index);
+
+            if (this.isCarryMode && this.checkCallback)
+                this.checkCallback();
         }
+    }
+
+    stopRunning() {
+        for (let i = 0; i < this.digits.length; i++) {
+            let i_arr = this.newIndices();
+            let _d = this.digits[i_arr[i]].node
+            // console.log("dig:", _d.name);
+            let pos = new Vec3(_d.position);
+            pos.y = this.h * (-1 + i);
+            _d.position = pos;
+        }
+        this.runState = eRunState.Idle;
     }
 
     initNumber(num: number) {
@@ -139,7 +183,7 @@ export class DigitRun extends Component {
                 for (let i = 0; i < this.digits.length; i++) {
                     let _d = this.digits[i].node
                     let pos = new Vec3(_d.position);
-                    pos.y = this.h * (-1 + i);
+                    pos.y = this.h * (1 - i);
                     _d.position = pos;
                 }
             }
@@ -164,8 +208,19 @@ export class DigitRun extends Component {
         else
             console.error("錯誤的字串:", str);
 
+        this.index = 1;
         this.digits[(index + 1) % 3].sp.spriteFrame = null;
         this.digits[(index + 2) % 3].sp.spriteFrame = null;
+
+        if (this.index != 1) {
+            this.index = 1
+            for (let i = 0; i < this.digits.length; i++) {
+                let _d = this.digits[i].node
+                let pos = new Vec3(_d.position);
+                pos.y = this.h * (1 - i);
+                _d.position = pos;
+            }
+        }
     }
 
     creatNumber(num: number, callback = null) {
@@ -182,8 +237,9 @@ export class DigitRun extends Component {
         this.Init();
         this.initDotComma(str, 2);
         this.runState = eRunState.Creator;
+        this.runnedTimes = 0;
         if (callback)
-            this.completeCall = callback;
+            this.completeCallback = callback;
     }
 
     runNumber(target: number) {
@@ -191,19 +247,62 @@ export class DigitRun extends Component {
         //fast
     }
 
-    slowRunNumber() {
+    /**
+     * 慢速旋轉
+     * @param runTimes 數字+1的次數
+     */
+    slowRunNumber(runTimes = -1) {
         console.log("[slowRunNumber]");
         this.runnedTimes = 0;
+        this.needRunTimes = runTimes < 0 ? Number.MAX_VALUE : runTimes;
         this.runState = eRunState.Slow;
     }
+    /**
+     * 快速旋轉
+     * @param runTimes 數字+1的次數
+     */
+    fastRunNumber(runTimes = -1, callback = null) {
+        let str = runTimes < 0 ? "isLoop" : "need run " + runTimes;
+        console.log("[fastRunNumber], ", str);
+        this.runnedTimes = 0;
+        this.needRunTimes = runTimes < 0 ? Number.MAX_VALUE : runTimes;
+        this.runState = eRunState.Fast;
 
-    nextNumber() {
-        this.target_n = this.curent_n + 1;
+        if (callback)
+            this.completeCallback = callback;
+    }
+
+    carryRunNumber(callback, checkCallback) {
+        this.isCarryMode = true;
+        this.carryCallback = callback;
+        this.checkCallback = checkCallback;
+        this.fastRunNumber();
+    }
+
+    nextNumber(callback) {
+        this.isCarryMode = true;
+        this.target_n = (this.curent_n + 1) % 10;
         this.needRunTimes = 1;
         this.runnedTimes = 0;
         console.log("[nextNumber], cur:", this.curent_n, " target:", this.target_n);
+        this.carryCallback = callback;
         this.runState = eRunState.Next;
     }
+
+    carryFinisedRunNumber() {
+        console.log(">>> name:", this.node.name)
+        this.stopRunning();
+        if (this.completeCallback)
+            this.completeCallback = null;
+        if (this.carryCallback)
+            this.carryCallback = null;
+    }
+
+    /**
+     * 
+     * @param target 目標數字
+     * @param callback 
+     */
     toTargetNumber(target: number, callback: Function = null) {
         if (isNaN(target)) {
             console.error("target is NaN!");
@@ -218,7 +317,7 @@ export class DigitRun extends Component {
         this.runState = eRunState.Next;
 
         if (callback)
-            this.completeCall = callback;
+            this.completeCallback = callback;
     }
 
     newIndices(): number[] {
