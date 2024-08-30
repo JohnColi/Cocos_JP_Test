@@ -6,7 +6,7 @@ const { ccclass, property } = _decorator;
 export class NumberManager extends Component {
     @property(Node) php_node: Node;
     @property(Prefab) dig_pfb: Prefab;
-    @property([DigitRun]) digits: DigitRun[] = [];
+    digits: DigitRun[] = [];
 
     @property([SpriteFrame])
     number_spf: SpriteFrame[] = [];
@@ -23,9 +23,9 @@ export class NumberManager extends Component {
     /**目標金額字串 */
     curTargetArr: string[] = [];
     /**已經停止到哪一個dig */digStopped_i = 0;
-    DigitRunState: eDigitRunState = eDigitRunState.carryRun;
+    DigitRunState: eDigitRunState = eDigitRunState.SequentiallyChange;
 
-    DigList = [3, 2, ".", 1, 0];
+    speed_faset = 2000;
 
     start() {
         this.digits = this.node.getComponentsInChildren(DigitRun);
@@ -35,6 +35,7 @@ export class NumberManager extends Component {
             window.jo.initNumber = this.initNumber.bind(this);
             window.jo.updateNumber = this.updateNumber.bind(this);
             window.jo.addNumber = this.addNumber.bind(this);
+            window.jo.resetNumber = this.clearNumber.bind(this)
             // window.jo.runNumber = this.sequentiallyChangeDigits.bind(this);
             this.scheduleOnce(() => { this.initNumber(100) }, 0.1)
         }
@@ -63,7 +64,7 @@ export class NumberManager extends Component {
         else if (digCount > _s.length) {
             let difference = digCount - _s.length;
             for (let i = 0; i < difference; i++) {
-                this.digits[i].reset2Zero()
+                this.digits[i].reset2Number()
                 this.digits[i].node.active = false;
             }
         }
@@ -85,11 +86,73 @@ export class NumberManager extends Component {
                     digNumber++;
                 }
                 else {
-                    this.digits[dig_i].initDotComma(_s[i]);
+                    this.digits[dig_i].creatDotComma(_s[i]);
                 }
                 dig_i--;
             }
         });
+    }
+
+    clearedCount = 0;
+    needClearCount = 0;
+    clearNumber(num: number) {
+        this.needClearCount = 0;
+        this.tarNumber = num;
+        for (let i = 0; i < this.digits.length; i++) {
+            if (this.digits[i].node.active)
+                this.needClearCount++;
+        }
+        let self = this;
+        let clearComplete: Function = () => {
+            self.clearedCount++;
+            console.log("clear complete , ", self.clearedCount);
+            if (self.clearedCount >= self.needClearCount) {
+                self.clearedCount = 0;
+                console.log("清理完畢");
+                self.initNumber_2();
+            }
+        };
+        for (let i = 0; i < this.digits.length; i++) {
+            let digit = this.digits[i];
+            if (digit.node.active)
+                digit.clearNumber(clearComplete);
+        }
+    }
+
+    initNumber_2() {
+        if (this.tarNumber == null) {
+            console.error("Not find target number")
+            this.tarNumber = 123.45;
+        }
+        let _str = this.tarNumber.toFixed(2);
+        this.curNumber = Number.parseFloat(_str);
+        console.log("initNumber_2:", this.curNumber);
+        // 使用正则表达式添加千位分隔符
+        _str = _str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let _s = _str.split(``);
+
+        for (let i = 0; i < this.digits.length; i++) {
+            let dif_n = this.digits.length - _s.length; //4
+            let digit = this.digits[i]
+            if (i < dif_n) {
+                digit.node.active = false;
+                continue;
+            }
+            let s_i = (i - dif_n);
+            let _n = Number.parseInt(_s[s_i]);
+
+            if (isNaN(_n)) {
+                console.log(_s[s_i]);
+                if (_s[s_i] == ",")
+                    digit.creatDotComma(",");
+                else
+                    digit.creatDotComma(".");
+            }
+            else {
+                console.log(_n);
+                digit.creatNumber(_n, null, (_n + 9) % 10);
+            }
+        }
     }
 
     creatorDigit() {

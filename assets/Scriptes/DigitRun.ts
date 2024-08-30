@@ -9,15 +9,18 @@ export class DigitRun extends Component {
     curent_n = 0;
     target_n = 0
     manager: NumberManager;
-    /** 符號用的寬度*/w = 64;
-    h = 238;
+    /** 符號用的寬度*/ w = 64;  // 64/96
+    h = 238; // 357/238 = 1.5倍
+    /** 依據2K,4K調整速率參數*/ rate = 1;
     runState = eRunState.Idle;
     /**中間的圖片index */ index = 1;
     isCarryMode = false;
+
     speed_slow = 100;
     speed_fast = 2000;
     speed_next = 1000; //1000
     speed_creator = 2000; //1000
+    speed_clear = 1500;
 
     /**已換圖的次數 */ runnedTimes = 0;
     needRunTimes = 0;
@@ -31,14 +34,21 @@ export class DigitRun extends Component {
         this.Init();
 
         if (this.isDebugMode) {
+            // @ts-ignore
             window.digitTest = new Object();
+            // @ts-ignore
             window.digitTest.nextNumber = this.nextNumber.bind(this);
+            // @ts-ignore
             window.digitTest.initNumber = this.initNumber.bind(this);
+            // @ts-ignore
             window.digitTest.toTargetNumber = this.toTargetNumber.bind(this);
+            // @ts-ignore
             window.digitTest.fastRunNumber = this.fastRunNumber.bind(this);
+            // @ts-ignore
             window.digitTest.slowRunNumber = this.slowRunNumber.bind(this);
-
+            // @ts-ignore
             window.digitTest.functionTest = this.functionTest.bind(this);
+
             for (let i = 0; i < this.digits.length; i++) {
                 this.digits[i].node.children[0].active = true;
             }
@@ -59,6 +69,9 @@ export class DigitRun extends Component {
         else if (this.runState == eRunState.Creator) {
             this.moveFunction(this.speed_creator, dt, 1);
         }
+        else if (this.runState == eRunState.Clear) {
+            this.moveFunction(this.speed_clear, dt, 1);
+        }
     }
 
     private Init() {
@@ -75,14 +88,20 @@ export class DigitRun extends Component {
         }
     }
 
-    reset2Zero() {
-        this.target_n = 0;
-        this.curent_n = 0;
-        this.index = 1;
+    /**
+     * 
+     * @param num 目標數字
+     */
+    reset2Number(num: number = 0) {
+        this.curent_n = (num + 9) % 10;
         this.digits[0].sp.spriteFrame = null;
         this.digits[1].sp.spriteFrame = null;
-        this.digits[2].sp.spriteFrame = this.manager.number_spf[1];
+        this.digits[2].sp.spriteFrame = this.manager.number_spf[num];
+        this.resetDigPos();
+    }
 
+    resetDigPos() {
+        this.index = 1
         for (let i = 0; i < this.digits.length; i++) {
             let _d = this.digits[i].node
             let pos = new Vec3(_d.position);
@@ -104,7 +123,7 @@ export class DigitRun extends Component {
         let needMove_i = -1;
         for (let i = 0; i < this.digits.length; i++) {
             let pos = new Vec3(this.digits[i].node.position);
-            pos.y += dt * _speed;
+            pos.y += dt * _speed * this.rate;
             this.digits[i].node.position = pos;
 
             if (pos.y > this.h) {
@@ -116,8 +135,7 @@ export class DigitRun extends Component {
             if (this.runnedTimes >= _times) {
                 // console.log("執行結束:", this.curent_n, "  index:", this.index);
                 this.stopRunning();
-                this.runState = eRunState.Idle;
-                // this.runnedTimes = 0;
+                this.runnedTimes = 0;
                 if (this.completeCallback) {
                     this.completeCallback();
                     this.completeCallback = null;
@@ -155,6 +173,7 @@ export class DigitRun extends Component {
     }
 
     stopRunning() {
+        this.runState = eRunState.Idle;
         for (let i = 0; i < this.digits.length; i++) {
             let i_arr = this.newIndices();
             let _d = this.digits[i_arr[i]].node
@@ -163,7 +182,6 @@ export class DigitRun extends Component {
             pos.y = this.h * (-1 + i);
             _d.position = pos;
         }
-        this.runState = eRunState.Idle;
     }
 
     initNumber(num: number) {
@@ -189,6 +207,14 @@ export class DigitRun extends Component {
             }
         }
     }
+
+    clearNumber(callback: Function) {
+        let _i = this.newIndices()[0];
+        this.digits[_i].sp.spriteFrame = null;
+        this.runState = eRunState.Clear;
+        this.completeCallback = callback;
+    }
+
     /**
      * 
      * @param str 符號 "," "."
@@ -196,6 +222,7 @@ export class DigitRun extends Component {
      */
     initDotComma(str: string, index = 1) {
         this.node.getComponent(UITransform).width = this.w;
+        this.resetDigPos();
         if (str == ',') {
             this.digits[index].sp.spriteFrame = this.manager.number_spf[eNumber.Comma];
             this.curent_n = eNumber.Comma;
@@ -208,36 +235,28 @@ export class DigitRun extends Component {
         else
             console.error("錯誤的字串:", str);
 
-        this.index = 1;
         this.digits[(index + 1) % 3].sp.spriteFrame = null;
         this.digits[(index + 2) % 3].sp.spriteFrame = null;
-
-        if (this.index != 1) {
-            this.index = 1
-            for (let i = 0; i < this.digits.length; i++) {
-                let _d = this.digits[i].node
-                let pos = new Vec3(_d.position);
-                pos.y = this.h * (1 - i);
-                _d.position = pos;
-            }
-        }
     }
 
-    creatNumber(num: number, callback = null) {
+    /**
+     * 
+     * @param num 目標數字
+     * @param callback 
+     * @param curent 
+     */
+    creatNumber(num: number, callback = null, curent: number = 0) {
         this.Init();
         this.target_n = num;
-        this.curent_n = 0;
-        this.digits[0].sp.spriteFrame = null;
-        this.digits[1].sp.spriteFrame = null;
-        this.digits[2].sp.spriteFrame = this.manager.number_spf[1];
+        this.reset2Number(curent);
         this.toTargetNumber(num, callback);
     }
 
     creatDotComma(str: string, callback = null) {
         this.Init();
         this.initDotComma(str, 2);
+        // this.runnedTimes = 0;
         this.runState = eRunState.Creator;
-        this.runnedTimes = 0;
         if (callback)
             this.completeCallback = callback;
     }
@@ -279,7 +298,7 @@ export class DigitRun extends Component {
         this.fastRunNumber();
     }
 
-    nextNumber(callback) {
+    nextNumber(callback, speed: number = 2000) {
         this.isCarryMode = true;
         this.target_n = (this.curent_n + 1) % 10;
         this.needRunTimes = 1;
@@ -313,7 +332,7 @@ export class DigitRun extends Component {
         this.needRunTimes = this.target_n - this.curent_n;
         this.needRunTimes = this.needRunTimes < 0 ? this.needRunTimes + 10 : this.needRunTimes;
         this.runnedTimes = 0;
-        console.log("[nextNumber], cur:", this.curent_n, " target:", this.target_n);
+        console.log("[toTargetNumber], cur:", this.curent_n, " target:", this.target_n);
         this.runState = eRunState.Next;
 
         if (callback)
@@ -338,11 +357,10 @@ export class DigitRun extends Component {
 
 enum eRunState {
     Idle,
-    Start,
     Fast,
     Slow,
-    Stoping,
-    End,
     Next,
     Creator, //創建表演
+    Reset,
+    Clear
 }
