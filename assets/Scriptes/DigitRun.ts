@@ -16,6 +16,7 @@ export class DigitRun extends Component {
     /**中間的圖片index */ index = 1;
     isCarryMode = false;
 
+    speed_running = 2000;
     speed_slow = 100;
     speed_fast = 2000;
     speed_next = 1000; //1000
@@ -71,6 +72,8 @@ export class DigitRun extends Component {
         }
         else if (this.runState == eRunState.Clear) {
             this.moveFunction(this.speed_clear, dt, 1);
+        } else if (this.runState == eRunState.Running) {
+            this.moveFunction(this.speed_running, dt, this.needRunTimes);
         }
     }
 
@@ -93,6 +96,7 @@ export class DigitRun extends Component {
      * @param num 目標數字
      */
     reset2Number(num: number = 0) {
+        console.log(">>>> reset2Number:", num);
         this.curent_n = (num + 9) % 10;
         this.digits[0].sp.spriteFrame = null;
         this.digits[1].sp.spriteFrame = null;
@@ -172,6 +176,13 @@ export class DigitRun extends Component {
         }
     }
 
+    startRun(speed: number, times: number) {
+        this.speed_running = speed;
+        this.needRunTimes = times;
+        this.runnedTimes = 0;
+        this.runState = eRunState.Running;
+    }
+
     stopRunning() {
         this.runState = eRunState.Idle;
         for (let i = 0; i < this.digits.length; i++) {
@@ -248,17 +259,27 @@ export class DigitRun extends Component {
     creatNumber(num: number, callback = null, curent: number = 0) {
         this.Init();
         this.target_n = num;
-        this.reset2Number(curent);
+        this.curent_n = curent;
+        this.digits[0].sp.spriteFrame = null;
+        this.digits[1].sp.spriteFrame = null;
+        this.digits[2].sp.spriteFrame = this.manager.number_spf[num];
+        this.resetDigPos();
         this.toTargetNumber(num, callback);
     }
 
-    creatDotComma(str: string, callback = null) {
+    /** */
+    creatDotComma(str: string, callback = null, speed: number = 0) {
         this.Init();
         this.initDotComma(str, 2);
-        // this.runnedTimes = 0;
-        this.runState = eRunState.Creator;
         if (callback)
             this.completeCallback = callback;
+
+        if (speed <= 0) {
+            this.runState = eRunState.Creator;
+        }
+        else {
+            this.startRun(speed, 1);
+        }
     }
 
     runNumber(target: number) {
@@ -357,10 +378,11 @@ export class DigitRun extends Component {
 
 enum eRunState {
     Idle,
+    Running,
     Fast,
     Slow,
     Next,
     Creator, //創建表演
     Reset,
-    Clear
+    Clear,
 }

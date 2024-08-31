@@ -61,18 +61,13 @@ export class NumberManager extends Component {
                 this.creatorDigit()
             }
         }
-        else if (digCount > _s.length) {
+        else if (digCount >= _s.length) {
             let difference = digCount - _s.length;
             for (let i = 0; i < difference; i++) {
                 this.digits[i].reset2Number()
                 this.digits[i].node.active = false;
             }
         }
-        // else {
-        //     for (let i = 0; i < this.digits.length; i++) {
-        //         this.digits[i].node.active = true;
-        //     }
-        // }
 
         this.scheduleOnce(() => {
         /**計算位數用*/ let digNumber = -2;
@@ -144,9 +139,9 @@ export class NumberManager extends Component {
             if (isNaN(_n)) {
                 console.log(_s[s_i]);
                 if (_s[s_i] == ",")
-                    digit.creatDotComma(",");
+                    digit.creatDotComma(",", null, 1000);
                 else
-                    digit.creatDotComma(".");
+                    digit.creatDotComma(".", null, 1000);
             }
             else {
                 console.log(_n);
@@ -361,6 +356,19 @@ export class NumberManager extends Component {
         this.updateNumber(this.curNumber + addNumber);
     }
 
+    /** 檢查digit數量是否大於數字*/
+    chececkDigitsEnough(num): boolean {
+        let _str = num.toFixed(2);
+        this.curNumber = Number.parseFloat(_str);
+        console.log("InitNumber:", this.curNumber);
+        // 使用正则表达式添加千位分隔符
+        _str = _str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let _s = _str.split(``);
+
+        let digCount = this.digits.length;
+        let b = digCount >= _s.length
+        return b;
+    }
 }
 
 export enum eNumber {

@@ -4,9 +4,9 @@ const { ccclass, property } = _decorator;
 @ccclass('CurrencyRun')
 export class CurrencyRun extends Component {
     speed_clear = 1500;
-    speed_creator = 2000; //1000
+    speed_next = 1000; //1000
 
-    h = 357; // 357/238 = 1.5倍
+    h = 238; // 357/238 = 1.5倍
     /** 依據2K,4K調整速率參數*/ rate = 1.5;
     /**已換圖的次數 */ runnedTimes = 0;
     needRunTimes = 0;
@@ -38,10 +38,10 @@ export class CurrencyRun extends Component {
 
     update(deltaTime: number) {
         if (this.runState == eRunState.Creator) {
-            this.moveFunction(this.speed_creator, deltaTime, 0);
+            this.moveFunction(this.speed_next, deltaTime, 0);
         }
         else if (this.runState == eRunState.Clear) {
-            this.moveFunction(this.speed_creator, deltaTime, this.h);
+            this.moveFunction(this.speed_clear, deltaTime, this.h);
         }
 
     }

@@ -1,5 +1,5 @@
-import { _decorator, Component, Node, sp, Vec3, Label, Color } from 'cc';
-import { Tween, tween } from 'cc';
+import { _decorator, Component, Node, sp, Vec3, Label, Color, AudioSource, Button } from 'cc';
+import { tween } from 'cc';
 import { NumberManager } from './NumberManager';
 import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
@@ -23,6 +23,10 @@ export class JackpotManager extends Component {
     versionLabel: Label;
     @property(Label)
     timerLabel: Label;
+    @property(Button)
+    close_btn: Button;
+
+    bgm: AudioSource;
 
     curColor: eColor = eColor.Blue;
 
@@ -37,8 +41,8 @@ export class JackpotManager extends Component {
     // 2560x1440 原是動畫大小
     // 1920X1080 machine 設定大小
 
-    labelPosY_GameWin = -71;
-    labelPosY_Idle = 1;
+    labelPosY_GameWin = -48; // -48/-71  
+    labelPosY_Idle = 1;  // 
     scale_GameWin = 0.9;
     isRollingNumber = false;
     screenType = eDisplay_screen.Bottom;
@@ -58,7 +62,7 @@ export class JackpotManager extends Component {
         window.api = new Object();
         //上螢幕
         // @ts-ignore
-        window.api.initJackpot = this.ShowJackpotIdle.bind(this);
+        window.api.initJackpot = this.showJackpotIdle.bind(this);
         // @ts-ignore
         window.api.hitJackpot = this.showJackpotTopWin.bind(this);
         // @ts-ignore
@@ -84,7 +88,7 @@ export class JackpotManager extends Component {
                 console.log("---cocos---", _data);
                 switch (_data.event) {
                     case "initJackpot":
-                        self.ShowJackpotIdle(_data.amount);
+                        self.showJackpotIdle(_data.amount);
                         break;
                     case "hitJackpot":
                         self.showJackpotTopWin(_data.amount, _data.msg);
@@ -108,7 +112,7 @@ export class JackpotManager extends Component {
             }
         });
 
-        let _v = "Ver. 2K.0.0.1";
+        let _v = "Ver. 2K.0.0.2";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
     }
@@ -116,6 +120,7 @@ export class JackpotManager extends Component {
         // this.Jp_label_Node.active = false;
         // this.jackpotSke.node.active = false;
         // this.ShowJackpotWin(1004680.78);
+        this.bgm = this.getComponent(AudioSource);
     }
 
     protected update(dt: number): void {
@@ -190,6 +195,7 @@ export class JackpotManager extends Component {
             this.runJPschedule = null;
         }
         console.log("[ShowJackpotWin], ", num);
+        this.bgm.play();
         this.jackpotSke.node.active = true;
         this.jpMask.active = false;
         this.jackpotCompleteCallback = jackpotCompleteCallback;
@@ -197,7 +203,7 @@ export class JackpotManager extends Component {
 
         // this.timerStart();
         this.targetNum = num;
-        this.SetJackpotText(0);
+        // this.SetJackpotText(0);
         this.runJPschedule = this.scheduleOnce(() => {
             this.jpMask.active = true;
             let _pos = new Vec3(this.jpMask.position.x, this.labelPosY_GameWin, this.jpMask.position.z);
@@ -208,12 +214,14 @@ export class JackpotManager extends Component {
 
         let self_jpske = this.jackpotSke;
         this.jackpotSke.setCompleteListener(() => {
-            this.JackpotComplete();
             self_jpske.setCompleteListener(null)
+            // 預留秀彈窗 處理
+            this.jackpotSke.setAnimation(0, eJackpotState.InGameWinLoop, true);
+            this.close_btn.node.active = true;
+
+            this.scheduleOnce(()=>{}, 30);
         });
-
     }
-
     public JackpotComplete() {
         this.jackpotSke.node.active = false;
         this.jpMask.active = false;
@@ -232,7 +240,7 @@ export class JackpotManager extends Component {
     //#endregion
 
     //#region Top Game Idel
-    ShowJackpotIdle(num: number) {
+    showJackpotIdle(num: number) {
         console.log("[ShowJackpotIdle], ", num);
         if (num == null) { num = 0 }
         this.jackpotSke.node.active = true;
@@ -242,7 +250,13 @@ export class JackpotManager extends Component {
         this.jpMask.setScale(Vec3.ONE);
         this.jackpotSke.setAnimation(0, eJackpotState.TopIdle, true);
         this.targetNum = num;
-        this.SetJackpotText(num);
+
+        // this.SetJackpotText(num);
+        let b = this.numberManager.chececkDigitsEnough(num);
+        if (b)
+            this.resetJackpotAmount(num);
+        else
+            this.numberManager.initNumber(num)
     }
 
     resetJackpotAmount(num: number) {
@@ -259,7 +273,7 @@ export class JackpotManager extends Component {
         this.jackpotSke.setCompleteListener(() => {
             console.log("[showJackpotTopWin] complete!");
             self.jackpotSke.setCompleteListener(null);
-            self.ShowJackpotIdle(self.origNum);
+            self.showJackpotIdle(self.origNum);
         });
 
         if (this.msgSchedule)
@@ -276,7 +290,7 @@ export class JackpotManager extends Component {
         this.jackpotSke.setCompleteListener(() => {
             console.log("[showOtherJackpotWin] complete!");
             self.jackpotSke.setCompleteListener(null);
-            self.ShowJackpotIdle(self.origNum);
+            self.showJackpotIdle(self.origNum);
         });
 
         if (this.msgSchedule)
@@ -343,7 +357,10 @@ export class JackpotManager extends Component {
             this.versionLabel.node.active = this.isDebugMode;
         }
     }
-
+    onTouch_JackpotClose() {
+        this.JackpotComplete();
+        this.close_btn.node.active = false;
+    }
     //#endregion
 }
 
