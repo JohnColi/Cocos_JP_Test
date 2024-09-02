@@ -7,7 +7,7 @@ export class CurrencyRun extends Component {
     speed_next = 1000; //1000
 
     h = 238; // 357/238 = 1.5倍
-    /** 依據2K,4K調整速率參數*/ rate = 1.5;
+    /** 依據2K,4K調整速率參數*/ rate = 1;
     /**已換圖的次數 */ runnedTimes = 0;
     needRunTimes = 0;
     runState: eRunState = eRunState.Idle;
@@ -23,7 +23,7 @@ export class CurrencyRun extends Component {
     }
     resetNumber() {
         let pos = new Vec3(this.node.position);
-        pos.y = -this.h *2;
+        pos.y = -this.h *1;
         this.node.position = pos;
 
         this.runState = eRunState.Creator;

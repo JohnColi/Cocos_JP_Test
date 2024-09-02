@@ -17,7 +17,6 @@ export class DigitRun extends Component {
     isCarryMode = false;
 
     speed_running = 2000;
-    speed_slow = 100;
     speed_fast = 2000;
     speed_next = 1000; //1000
     speed_creator = 2000; //1000
@@ -57,11 +56,7 @@ export class DigitRun extends Component {
     }
 
     protected update(dt: number): void {
-
-        if (this.runState == eRunState.Slow) {
-            this.moveFunction(this.speed_slow, dt, this.needRunTimes);
-        }
-        else if (this.runState == eRunState.Fast) {
+        if (this.runState == eRunState.Fast) {
             this.moveFunction(this.speed_fast, dt, this.needRunTimes);
         }
         else if (this.runState == eRunState.Next) {
