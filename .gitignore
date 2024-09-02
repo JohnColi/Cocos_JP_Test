@@ -22,3 +22,10 @@ node_modules/
 # WebStorm
 #//////////////////////////
 .idea/
+assets/Sources/2K/
+assets/Resource/4K/
+assets/Resource/4K.meta
+assets/Resource/2K/
+assets/Resource/2K.meta
+assets/Resource/4KH/
+assets/Resource/4KH.meta
