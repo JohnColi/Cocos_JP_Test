@@ -1,4 +1,4 @@
-import { _decorator, Canvas, Component, instantiate, Node, Prefab, sp } from 'cc';
+import { _decorator, Component, instantiate, Node, Prefab, sp } from 'cc';
 import { assetManager } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -34,9 +34,5 @@ export class LoadTheme extends Component {
                 });
             }
         });
-    }
-
-    update(deltaTime: number) {
-
     }
 }

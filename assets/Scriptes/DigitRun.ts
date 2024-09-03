@@ -86,6 +86,10 @@ export class DigitRun extends Component {
         }
     }
 
+    setRect(data: { h, w, rate }) {
+
+    }
+
     /**
      * 
      * @param num 目標數字

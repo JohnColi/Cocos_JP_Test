@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, Sprite } from 'cc';
 import { DigitRun } from './DigitRun';
+import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
 
 @ccclass('NumberManager')
@@ -10,8 +11,8 @@ export class NumberManager extends Component {
 
     @property([SpriteFrame])
     number_spf: SpriteFrame[] = [];
-    /**貨幣的圖片Node */
-    @property(Node) currency: Node;
+    /**貨幣的圖片 */
+    @property(CurrencyRun) currencyRun: CurrencyRun;
 
     curNumber: number = 0;
     tarNumber: number = 0;
@@ -25,6 +26,8 @@ export class NumberManager extends Component {
     /**已經停止到哪一個dig */digStopped_i = 0;
     DigitRunState: eDigitRunState = eDigitRunState.SequentiallyChange;
 
+    digitData = [{ h: 238, w: 64, rate: 1 }, { h: 357, w: 96, rate: 1.5 }]
+
     speed_faset = 2000;
 
     start() {
@@ -32,12 +35,23 @@ export class NumberManager extends Component {
         if (this.isDebugMode) {
             // @ts-ignore
             window.jo = new Object();
+            // @ts-ignore
             window.jo.initNumber = this.initNumber.bind(this);
+            // @ts-ignore
             window.jo.updateNumber = this.updateNumber.bind(this);
+            // @ts-ignore
             window.jo.addNumber = this.addNumber.bind(this);
+            // @ts-ignore
             window.jo.resetNumber = this.clearNumber.bind(this)
-            // window.jo.runNumber = this.sequentiallyChangeDigits.bind(this);
-            this.scheduleOnce(() => { this.initNumber(100) }, 0.1)
+
+            // this.scheduleOnce(() => { this.initNumber(100) }, 0.1)
+        }
+    }
+
+    init(is4K: boolean) {
+        let _data = is4K ? this.digitData[1] : this.digitData[0];
+        for(let i  = 0 ; i < this.digits.length ; i++){
+            this.digits[i]
         }
     }
 
@@ -91,6 +105,8 @@ export class NumberManager extends Component {
     clearedCount = 0;
     needClearCount = 0;
     clearNumber(num: number) {
+        this.currencyRun.clearNumber();
+
         this.needClearCount = 0;
         this.tarNumber = num;
         for (let i = 0; i < this.digits.length; i++) {

@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, sp, Vec3, Label, Color, AudioSource, Button } from 'cc';
-import { tween } from 'cc';
+import { _decorator, Button, Color, Component, instantiate, Node, Prefab, sp, Vec3, Label, resources, find } from 'cc';
+import { assetManager, AudioSource, tween } from 'cc';
+import { ResolutionPolicy, view } from 'cc';
 import { NumberManager } from './NumberManager';
-import { CurrencyRun } from './CurrencyRun';
+import { EDITOR, PREVIEW } from 'cc/env';
 const { ccclass, property } = _decorator;
 
 @ccclass('JackpotManager')
@@ -10,54 +11,51 @@ export class JackpotManager extends Component {
     jackpotSke: sp.Skeleton;
 
     @property(Node)
+    JackpotPool: Node;
     jpMask: Node;
-    @property(NumberManager)
     numberManager: NumberManager;
-    @property(CurrencyRun)
-    currencyRun: CurrencyRun;
     @property(Label)
     msg_label: Label;
+
+    @property(Button)
+    close_btn: Button;
+    bgm: AudioSource;
+
+    numberNode: Node[] = [null, null];
+
+    JP_run; //save ttimer
+    /**要到達的金額 */
+    targetNum: number = 0;
+    nowNum: number = 0;
+    origNum: number = 1000;
+    jackpotCompleteCallback = null;
+    /**中獎表演開啟 */ runJPschedule = null;
+
+    labelPosY_GameWin = -48; // -48/-71  
+    labelPosY_Idle = 1;  // 
+    scale_GameWin = 0.9;
+    isRollingNumber = false;
+    displayModel = eDisplayModel.Normal;
+    themeColor = eColor.Red;
+    is4K = false;
+
+    msgSchedule = null;
 
     // debug
     @property(Label)
     versionLabel: Label;
     @property(Label)
     timerLabel: Label;
-    @property(Button)
-    close_btn: Button;
-
-    bgm: AudioSource;
-
-    curColor: eColor = eColor.Blue;
-
-    JP_run; //save ttimer
-    totalCount = 100;
-    /**要到達的金額 */
-    targetNum: number = 0;
-    nowNum: number = 0;
-    origNum: number = 1000;
-    jackpotCompleteCallback = null;
-    runJPschedule = null;
-    // 2560x1440 原是動畫大小
-    // 1920X1080 machine 設定大小
-
-    labelPosY_GameWin = -48; // -48/-71  
-    labelPosY_Idle = 1;  // 
-    scale_GameWin = 0.9;
-    isRollingNumber = false;
-    screenType = eDisplay_screen.Bottom;
-
-    msgSchedule = null;
-
     clickDebugTimes = 0;
     isDebugMode = false;
     isDebugTimer = false;
     debugTimer = 0;
 
-    protected onLoad(): void {
-        // window.demoTest = new Object();
-        // window.demoTest.InputJackpot = this.InputJackpot.bind(this);
+    //3840 x 2160
+    //3840 x 1690
+    //2560 x 1440
 
+    protected onLoad(): void {
         // @ts-ignore
         window.api = new Object();
         //上螢幕
@@ -77,7 +75,6 @@ export class JackpotManager extends Component {
 
         // @ts-ignore
         window.api.changeColor = this.changeThemeColor.bind(this);
-        window.api.resetAmount = this.resetJackpotAmount.bind(this);
 
         let self = this;
         //postmessage
@@ -116,11 +113,19 @@ export class JackpotManager extends Component {
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
     }
+
     start() {
-        // this.Jp_label_Node.active = false;
-        // this.jackpotSke.node.active = false;
-        // this.ShowJackpotWin(1004680.78);
+        // console.log("is EDITOR:", EDITOR, "  PREVIEW:", PREVIEW);
         this.bgm = this.getComponent(AudioSource);
+        if (EDITOR) {
+            this.displayModel = eDisplayModel.Normal_4K;
+            this.themeColor = eColor.Green;
+            this.changeBundle();
+            this.setNumberManager();
+        } else {
+            this.getUrlParams();
+        }
+
     }
 
     protected update(dt: number): void {
@@ -131,56 +136,130 @@ export class JackpotManager extends Component {
     }
 
     // by url 
-    public SetDisplayScreen() {
+    public getUrlParams() {
         var url = window.location.href;
-        let params = url.split("?")[1].split("&");
+        console.log("location:", window.location);
+        let params_all = url.split("?");
 
-        for (let i = 0; i < params.length; i++) {
-            let param = params[i];
-            let keyValuePair = param.split("="); // 分割键和值
-            if (keyValuePair.length === 2 && keyValuePair[0] === "display_screen") {
-                let jackpotValue = keyValuePair[1];
-
-                let parsedValue = parseFloat(jackpotValue);
-                if (isNaN(parsedValue)) {
-                    console.error("Failed to parse jackpot value:", jackpotValue);
-                    return;
+        if (params_all.length > 1) {
+            let params = params_all[1].split("&");
+            for (let i = 0; i < params.length; i++) {
+                let param = params[i];
+                let keyValuePair = param.split("="); // 分割键和值
+                if (keyValuePair.length === 2) {
+                    if (keyValuePair[0] === "display_model") {
+                        this.setTheme(keyValuePair[1]);
+                    } else if (keyValuePair[0] === "theme_color") {
+                        this.changeThemeColor(keyValuePair[1]);
+                    }
                 }
-                break;
             }
         }
+
+        this.is4K = this.displayModel != eDisplayModel.Normal;
+        this.changeBundle();
+        this.setNumberManager();
     }
 
     changeThemeColor(color: string) {
-        const lowercasedColor: string = color.toLowerCase();
-        console.log("change color: ", lowercasedColor); // 輸出: "red"
+        let lowercasedColor = color.toLowerCase();
 
-        let selectedColor: eColor;
         switch (lowercasedColor) {
             case "red":
-                selectedColor = eColor.Red;
+                this.themeColor = eColor.Red;
                 break;
             case "yellow":
-                selectedColor = eColor.Yellow;
+                this.themeColor = eColor.Yellow;
                 break;
             case "green":
-                selectedColor = eColor.Green;
+                this.themeColor = eColor.Green;
                 break;
             case "blue":
-                selectedColor = eColor.Blue;
+                this.themeColor = eColor.Blue;
                 break;
             case "purple":
-                selectedColor = eColor.Purple;
+                this.themeColor = eColor.Purple;
                 break;
             default:
                 console.error(`未知的顏色：${lowercasedColor}`);
-                selectedColor = eColor.Red;
+                this.themeColor = eColor.Red;
                 return;
         }
+    }
 
-        console.log(`更改顏色：${selectedColor}`);
-        this.jackpotSke.clearTracks();
-        this.jackpotSke.skeletonData = null;
+    setTheme(theme: string) {
+        let v = theme.toLowerCase();
+        switch (v) {
+            case "normal":
+                this.displayModel = eDisplayModel.Normal;
+                break;
+            case "normal_4k":
+                this.displayModel = eDisplayModel.Normal_4K;
+                break;
+            case "thin":
+                this.displayModel = eDisplayModel.Thin;
+                break;
+            case "hybrid":
+                this.displayModel = eDisplayModel.Hybrid;
+                break;
+            default:
+                console.error(`Unknown display model: ${v}`);
+                this.displayModel = eDisplayModel.Normal;
+                break;
+        }
+    }
+
+    changeBundle() {
+        const domainUrl = "https://prd10-icontent.calda.win/lax/7001/assets/"
+
+        let url = this.themeColor + this.displayModel;
+        if (EDITOR || PREVIEW) {
+            url = url;
+            if (this.displayModel != eDisplayModel.Normal)
+                view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
+        } else {
+            url = domainUrl + url;
+        }
+
+        console.log("bundle URL:", url);
+        let self = this;
+        if (this.JackpotPool.children.length >= 0)
+            this.JackpotPool.removeAllChildren();
+        assetManager.loadBundle(url, (err, bundle) => {
+            if (err) {
+                console.error(err);
+            } else {
+                bundle.load(`Jackpot`, Prefab, function (err, prefab) {
+                    if (err) {
+                        console.error("prefab is error,", err);
+                    } else {
+                        let obj = instantiate(prefab);
+                        let _ske = obj.getComponent(sp.Skeleton);
+                        self.jackpotSke = _ske;
+                        self.JackpotPool.insertChild(obj, 1);
+                    }
+                });
+            }
+        });
+    }
+
+    setNumberManager() {
+        let i_manage = this.displayModel == eDisplayModel.Normal ? 0 : 1;
+        let url = this.displayModel == eDisplayModel.Normal ? "Prefab/NumberMask" : "Prefab/NumberMask_4K";
+        let self = this;
+        if (!this.numberNode[i_manage]) {
+            resources.load(url, Prefab, (err, prefab) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                const obj = instantiate(prefab);
+                find('Canvas').insertChild(obj, 2);
+                self.jpMask = obj;
+                self.numberManager = obj.children[0].getComponent(NumberManager);
+                self.numberManager.init(self.is4K);
+            });
+        }
     }
 
     //#region Game Win
@@ -219,7 +298,7 @@ export class JackpotManager extends Component {
             this.jackpotSke.setAnimation(0, eJackpotState.InGameWinLoop, true);
             this.close_btn.node.active = true;
 
-            this.scheduleOnce(()=>{}, 30);
+            this.scheduleOnce(() => { }, 30);
         });
     }
     public JackpotComplete() {
@@ -254,14 +333,9 @@ export class JackpotManager extends Component {
         // this.SetJackpotText(num);
         let b = this.numberManager.chececkDigitsEnough(num);
         if (b)
-            this.resetJackpotAmount(num);
+            this.numberManager.clearNumber(num);
         else
             this.numberManager.initNumber(num)
-    }
-
-    resetJackpotAmount(num: number) {
-        this.numberManager.clearNumber(num);
-        this.currencyRun.clearNumber();
     }
 
     showJackpotTopWin(num: number, msg: string) {
@@ -372,16 +446,17 @@ enum eJackpotState {
     TopWin = "Top_Win_Player",
 }
 
-enum eDisplay_screen {
-    Top = "top",
-    Middle = "middle",
-    Bottom = "bottom"
+enum eDisplayModel {
+    Normal = "",
+    Normal_4K = "4K",
+    Thin = "Banner",
+    Hybrid = "4KH"
 }
 
 enum eColor {
-    Red = 0,
-    Yellow,
-    Green,
-    Blue,
-    Purple
+    Red = "Red",
+    Yellow = "Yellow",
+    Green = "Green",
+    Blue = "Blue",
+    Purple = "Purple"
 }
