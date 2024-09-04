@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, Sprite } from 'cc';
+import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate } from 'cc';
 import { DigitRun } from './DigitRun';
 import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
@@ -26,12 +26,21 @@ export class NumberManager extends Component {
     /**已經停止到哪一個dig */digStopped_i = 0;
     DigitRunState: eDigitRunState = eDigitRunState.SequentiallyChange;
 
-    digitData = [{ h: 238, w: 64, rate: 1 }, { h: 357, w: 96, rate: 1.5 }]
+    @property(Boolean)
+    is4K = false;
 
+    digitData = [{ h: 238, w: 64, rate: 1 }, { h: 357, w: 96, rate: 1.5 }];
+    
     speed_faset = 2000;
 
     start() {
         this.digits = this.node.getComponentsInChildren(DigitRun);
+        let _data = this.is4K ? this.digitData[1] : this.digitData[0];
+        for (let i = 0; i < this.digits.length; i++) {
+            this.digits[i].setRectData(_data);
+        }
+        this.currencyRun.setRectData(_data);
+
         if (this.isDebugMode) {
             // @ts-ignore
             window.jo = new Object();
@@ -49,10 +58,7 @@ export class NumberManager extends Component {
     }
 
     init(is4K: boolean) {
-        let _data = is4K ? this.digitData[1] : this.digitData[0];
-        for(let i  = 0 ; i < this.digits.length ; i++){
-            this.digits[i]
-        }
+        this.is4K = is4K;
     }
 
     initNumber(num: number) {
@@ -172,6 +178,8 @@ export class NumberManager extends Component {
         obj.name = "dig_" + (this.digits.length - 3);
         console.log("creat digit name", obj.name);
         let _digitRun = obj.getComponent(DigitRun);
+        let _d = this.is4K ? this.digitData[1] : this.digitData[0];
+        _digitRun.setRectData(_d);
         this.digits.unshift(_digitRun);
     }
 

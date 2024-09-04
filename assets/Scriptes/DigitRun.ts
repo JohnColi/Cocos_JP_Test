@@ -1,10 +1,18 @@
-import { _decorator, Component, Node, Sprite, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Component, Node, Sprite, UITransform, Vec2, Vec3, Enum } from 'cc';
 import { NumberManager, eNumber } from './NumberManager';
 const { ccclass, property } = _decorator;
+
+enum eResolution {
+    _2K,
+    _4K
+}
 
 @ccclass('DigitRun')
 export class DigitRun extends Component {
     @property({ step: 1 }) id: number = 0;
+    @property({ type: Enum(eResolution) })
+    resolution: eResolution = eResolution._2K;
+
     digits: { node: Node, sp: Sprite }[] = [];
     curent_n = 0;
     target_n = 0
@@ -86,8 +94,11 @@ export class DigitRun extends Component {
         }
     }
 
-    setRect(data: { h, w, rate }) {
-
+    setRectData(data: { h, w, rate }) {
+        this.h = data.h;
+        this.w = data.w;
+        this.rate = data.rate;
+        this.resolution = data.h >= 350 ? eResolution._4K : eResolution._2K;
     }
 
     /**
@@ -226,7 +237,6 @@ export class DigitRun extends Component {
     }
 
     /**
-     * 
      * @param str 符號 "," "."
      * @param index 要改哪一個位置
      */

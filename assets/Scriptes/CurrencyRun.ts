@@ -16,6 +16,10 @@ export class CurrencyRun extends Component {
         window.currency = new Object();
         window.currency.clearNumber = this.clearNumber.bind(this);
     }
+    setRectData(data: { h, w, rate }) {
+        this.h = data.h;
+        this.rate = data.rate;
+    }
 
     clearNumber() {
         this.runState = eRunState.Clear;

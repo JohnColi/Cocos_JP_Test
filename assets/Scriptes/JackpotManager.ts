@@ -34,6 +34,8 @@ export class JackpotManager extends Component {
     labelPosY_GameWin = -48; // -48/-71  
     labelPosY_Idle = 1;  // 
     scale_GameWin = 0.9;
+    scale_hybrid = 0.8;
+
     isRollingNumber = false;
     displayModel = eDisplayModel.Normal;
     themeColor = eColor.Red;
@@ -54,6 +56,8 @@ export class JackpotManager extends Component {
     //3840 x 2160
     //3840 x 1690
     //2560 x 1440
+
+    msgLabelDataMap = new Map<eDisplayModel, { y: number, scale: number }>();
 
     protected onLoad(): void {
         // @ts-ignore
@@ -112,14 +116,23 @@ export class JackpotManager extends Component {
         let _v = "Ver. 2K.0.0.2";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
+
+        // this.msgLabelDataMap.set(eDisplayModel.Normal, { y: -228, w: 1520, h: 158, fontSize: 85 });
+        // this.msgLabelDataMap.set(eDisplayModel.Hybrid, { y: -260, w: 1725, h: 170, fontSize: 110 });
+        // this.msgLabelDataMap.set(eDisplayModel.Normal_4K, { y: -330, w: 2270, h: 200, fontSize: 110 });
+
+        this.msgLabelDataMap.set(eDisplayModel.Normal, { y: -228, scale: 1 });
+        this.msgLabelDataMap.set(eDisplayModel.Normal_4K, { y: -336, scale: 1.5 });
+        this.msgLabelDataMap.set(eDisplayModel.Hybrid, { y: -262, scale: 1.16 });
     }
 
     start() {
-        // console.log("is EDITOR:", EDITOR, "  PREVIEW:", PREVIEW);
         this.bgm = this.getComponent(AudioSource);
         if (EDITOR) {
             this.displayModel = eDisplayModel.Normal_4K;
-            this.themeColor = eColor.Green;
+            this.themeColor = eColor.Purple;
+            // @ts-ignore
+            this.is4K = (this.displayModel != eDisplayModel.Normal);
             this.changeBundle();
             this.setNumberManager();
         } else {
@@ -215,8 +228,8 @@ export class JackpotManager extends Component {
         let url = this.themeColor + this.displayModel;
         if (EDITOR || PREVIEW) {
             url = url;
-            if (this.displayModel != eDisplayModel.Normal)
-                view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
+            // if (this.displayModel != eDisplayModel.Normal)
+            //     view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
         } else {
             url = domainUrl + url;
         }
@@ -246,7 +259,9 @@ export class JackpotManager extends Component {
     setNumberManager() {
         let i_manage = this.displayModel == eDisplayModel.Normal ? 0 : 1;
         let url = this.displayModel == eDisplayModel.Normal ? "Prefab/NumberMask" : "Prefab/NumberMask_4K";
+        let needScale = this.displayModel == eDisplayModel.Hybrid;
         let self = this;
+
         if (!this.numberNode[i_manage]) {
             resources.load(url, Prefab, (err, prefab) => {
                 if (err) {
@@ -258,6 +273,9 @@ export class JackpotManager extends Component {
                 self.jpMask = obj;
                 self.numberManager = obj.children[0].getComponent(NumberManager);
                 self.numberManager.init(self.is4K);
+                if (needScale) {
+                    obj.setScale(new Vec3(this.scale_hybrid, this.scale_hybrid, 1));
+                }
             });
         }
     }
@@ -326,11 +344,15 @@ export class JackpotManager extends Component {
         this.jpMask.active = true;
         let _pos = new Vec3(this.jpMask.position.x, this.labelPosY_Idle, this.jpMask.position.z);
         this.jpMask.setPosition(_pos);
-        this.jpMask.setScale(Vec3.ONE);
+
+        if (this.displayModel == eDisplayModel.Hybrid)
+            this.jpMask.setScale(new Vec3(this.scale_hybrid, this.scale_hybrid, 1));
+        else
+            this.jpMask.setScale(Vec3.ONE);
+
         this.jackpotSke.setAnimation(0, eJackpotState.TopIdle, true);
         this.targetNum = num;
-
-        // this.SetJackpotText(num);
+        // 是否已經有digits
         let b = this.numberManager.chececkDigitsEnough(num);
         if (b)
             this.numberManager.clearNumber(num);
@@ -380,6 +402,12 @@ export class JackpotManager extends Component {
     }
 
     showMsg(msg: string) {
+        const msgData = this.msgLabelDataMap.get(this.displayModel);
+        let pos = new Vec3(this.msg_label.node.position);
+        pos.y = msgData.y;
+        this.msg_label.node.setPosition(pos);
+        this.msg_label.node.setScale(new Vec3(msgData.scale, msgData.scale, 1));
+
         // 987654321**** win the magin Jackpot
         this.msg_label.string = msg;
         this.msg_label.node.active = true;
@@ -443,9 +471,12 @@ enum eJackpotState {
     InGameWinStart = "InGame_PlayerWin_Start",
     TopIdle = "Top_Idle1",
     TopOtherWin = "Top_Win",
-    TopWin = "Top_Win_Player",
+    TopWin = "Top_Winp_Player",
 }
-
+enum eResolution {
+    _2K = "2K",
+    _4K = "4K"
+}
 enum eDisplayModel {
     Normal = "",
     Normal_4K = "4K",
