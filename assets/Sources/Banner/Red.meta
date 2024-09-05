@@ -1,0 +1,12 @@
+{
+  "ver": "1.2.0",
+  "importer": "directory",
+  "imported": true,
+  "uuid": "2b66c167-858c-425e-9e43-3127bf093dfa",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "isBundle": true,
+    "bundleName": "RedB"
+  }
+}

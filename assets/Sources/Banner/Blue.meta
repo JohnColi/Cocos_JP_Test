@@ -1,0 +1,12 @@
+{
+  "ver": "1.2.0",
+  "importer": "directory",
+  "imported": true,
+  "uuid": "eab76f4c-fef1-4133-aa6b-1f55f11f96cc",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "isBundle": true,
+    "bundleName": "BlueB"
+  }
+}
