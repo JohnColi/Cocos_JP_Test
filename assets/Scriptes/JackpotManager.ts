@@ -1,5 +1,6 @@
-import { _decorator, Button, Color, Component, instantiate, Node, Prefab, sp, Vec3, Label, resources, find, editorExtrasTag } from 'cc';
+import { _decorator, Button, Color, Component, instantiate, Node, Prefab, sp, Vec3, Label, resources, find, editorExtrasTag, view, Size } from 'cc';
 import { assetManager, AudioSource, tween } from 'cc';
+import { ResolutionPolicy, screen } from 'cc';
 import { JackpotBanner } from './JackpotBanner';
 import { NumberManager } from './NumberManager';
 import { EDITOR, PREVIEW } from 'cc/env';
@@ -27,7 +28,7 @@ export class JackpotManager extends Component {
     JP_run; //save ttimer
     /**要到達的金額 */
     targetNum: number = 0;
-    nowNum: number = 0;
+    curNum: number = 0;
     origNum: number = 1000;
     jackpotCompleteCallback = null;
     /**中獎表演開啟 */ runJPschedule = null;
@@ -42,6 +43,7 @@ export class JackpotManager extends Component {
     themeColor = eColor.Red;
     resolution = eResolution._2K;
     is4K = false;
+    isHaveAmount = false;
 
     msgSchedule = null;
 
@@ -54,6 +56,9 @@ export class JackpotManager extends Component {
     isDebugMode = false;
     isDebugTimer = false;
     debugTimer = 0;
+
+    /**初始化用 */ progressCount = 0;
+    isLoadingFinished = false;
 
     //3840 x 2160
     //3840 x 1690
@@ -82,6 +87,8 @@ export class JackpotManager extends Component {
 
         // @ts-ignore
         window.api.changeColor = this.changeThemeColor.bind(this);
+        window.api.setResolution = this.resolutionTest.bind(this);
+        window.api.setScreen = this.setScreenTest.bind(this);
 
         let self = this;
         //postmessage
@@ -118,7 +125,7 @@ export class JackpotManager extends Component {
 
         //ftp://ftp.calda.win/lax/7001/clients/0.0.2?theme_color=Green&display_model=normal&resolution=4K&amount=30000
 
-        let _v = "Ver. 0.0.2";
+        let _v = "Ver. 0.0.3";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
 
@@ -131,23 +138,42 @@ export class JackpotManager extends Component {
 
     start() {
         this.bgm = this.getComponent(AudioSource);
-        if (EDITOR) {
-            this.displayModel = eDisplayModel.Normal;
+        if (EDITOR || this.isDebugMode) {
+            this.displayModel = eDisplayModel.Hybrid;
             this.resolution = eResolution._4K;
             this.themeColor = eColor.Purple;
-            // @ts-ignore
-            this.is4K = (this.displayModel != eDisplayModel.Normal);
+            // @ts-ignore 要防呆
+            if (this.displayModel == eDisplayModel.Hybrid || (this.displayModel == eDisplayModel.Normal && this.resolution == eResolution._4K)) {
+                this.resolution = eResolution._4K;
+                this.is4K = true;
+            } else {
+                this.resolution = eResolution._2K;
+                this.is4K = false;
+            }
+
             this.changeBundle();
+            this.setResolution();
             this.setNumberManager();
         } else {
             this.getUrlParams();
         }
+
+        // this.scheduleOnce(() => {
+        //     if (this.isHaveAmount) {
+        //         this.showJackpotIdle(this.curNum);
+        //     }
+        // }, 0.2);
     }
 
     protected update(dt: number): void {
-        if (this.isDebugTimer) {
-            this.debugTimer += dt;
-            this.timerLabel.string = this.debugTimer.toFixed(2);
+        // if (this.isDebugTimer) {
+        //     this.debugTimer += dt;
+        //     this.timerLabel.string = this.debugTimer.toFixed(2);
+        // }
+        if (!this.isLoadingFinished && this.progressCount >= 2) {
+            this.isLoadingFinished = true;
+            if (this.isHaveAmount)
+                this.showJackpotIdle(this.curNum);
         }
     }
 
@@ -174,17 +200,29 @@ export class JackpotManager extends Component {
                             this.resolution = eResolution._4K;
                         else
                             this.resolution = eResolution._2K;
-                    }else if(keyValuePair[0] === "amount"){
-                        console.warn("有初始金額");
+                    } else if (keyValuePair[0] === "amount") {
+                        let v = Number.parseFloat(keyValuePair[1]);
+                        if (v) {
+                            console.warn("有初始金額:", keyValuePair[1]);
+                            this.isHaveAmount = true;
+                            this.curNum = v;
+                        }
                     }
                 }
             }
         }
 
         // 要防呆
-        if (this.displayModel == eDisplayModel.Hybrid || (this.displayModel == eDisplayModel.Normal && this.resolution == eResolution._4K))
+        if (this.displayModel == eDisplayModel.Hybrid || (this.displayModel == eDisplayModel.Normal && this.resolution == eResolution._4K)) {
+            this.resolution = eResolution._4K;
             this.is4K = true;
+        } else {
+            this.resolution = eResolution._2K;
+            this.is4K = false;
+        }
+
         this.changeBundle();
+        this.setResolution();
         this.setNumberManager();
     }
 
@@ -248,12 +286,12 @@ export class JackpotManager extends Component {
                 break;
         }
 
-        if (EDITOR || PREVIEW) {
+        if (EDITOR || PREVIEW || this.isDebugMode) {
             url = url;
             // if (this.displayModel != eDisplayModel.Normal)
             //      view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
         } else {
-            const domainUrl = "https://prd10-icontent.calda.win/lax/7001/assets/"
+            const domainUrl = "https://prd10-icontent.calda.win/lax/7001/assets/0.0.1/"
             url = domainUrl + url;
         }
 
@@ -265,9 +303,9 @@ export class JackpotManager extends Component {
             if (err) {
                 console.error(err);
             } else {
-                bundle.load(`Jackpot`, Prefab, function (err, prefab) {
-                    if (err) {
-                        console.error("prefab is error,", err);
+                bundle.load(`Jackpot`, Prefab, function (err2, prefab) {
+                    if (err2) {
+                        console.error("prefab is error,", err2);
                     } else {
                         let obj = instantiate(prefab);
                         self.JackpotPool.insertChild(obj, 1);
@@ -278,10 +316,54 @@ export class JackpotManager extends Component {
                         else {
                             self.jackpotSke = obj.getComponent(sp.Skeleton);
                         }
+                        self.progressCount++;
                     }
                 });
             }
         });
+    }
+
+    setResolution() {
+        let w = 0; let h = 0;
+        if (this.displayModel == eDisplayModel.Thin) { w = 3840; h = 481; }
+        else if (this.displayModel == eDisplayModel.Hybrid) {
+            w = 3840; h = 1690;
+        }
+        else { //eDisplayModel.Normal
+            if (this.resolution == eResolution._2K) { w = 2560; h = 1440; }
+            else { w = 3840; h = 2160; }
+        }
+        view.setDesignResolutionSize(w, h, ResolutionPolicy.SHOW_ALL);
+        console.log("model:", this.displayModel, " _", this.resolution, " , size:", view.getDesignResolutionSize());
+        screen.windowSize = new Size(w, h);
+    }
+
+    resolutionTest(w: number, h: number, index) {
+        switch (index) {
+            case 0:
+                view.setDesignResolutionSize(w, h, ResolutionPolicy.EXACT_FIT);
+                break;
+            case 1:
+                view.setDesignResolutionSize(w, h, ResolutionPolicy.SHOW_ALL);
+                break;
+            case 2:
+                view.setDesignResolutionSize(w, h, ResolutionPolicy.NO_BORDER);
+                break;
+            case 3:
+                view.setDesignResolutionSize(w, h, ResolutionPolicy.FIXED_HEIGHT);
+                break;
+            case 4:
+                view.setDesignResolutionSize(w, h, ResolutionPolicy.FIXED_WIDTH);
+                break;
+            default:
+                console.error("沒有此分辨率");
+                return
+        }
+        console.log("model:", this.displayModel, " _", this.resolution, " , size:", view.getDesignResolutionSize());
+    }
+
+    setScreenTest(w: number, h: number) {
+        screen.windowSize = new Size(w, h);
     }
 
     setNumberManager() {
@@ -313,6 +395,7 @@ export class JackpotManager extends Component {
                 if (self.displayModel == eDisplayModel.Thin) {
                     obj.setPosition(new Vec3(self.thin_numberData.x, self.thin_numberData.y, 1));
                 }
+                self.progressCount++;
             });
         }
     }
@@ -471,7 +554,7 @@ export class JackpotManager extends Component {
     }
 
     updateJackpot(num: number) {
-        this.nowNum = this.targetNum;
+        this.curNum = this.targetNum;
         this.targetNum = num;
         this.numberManager.updateNumber(num);
     }

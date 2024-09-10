@@ -59,6 +59,7 @@ export class NumberManager extends Component {
 
     init(is4K: boolean) {
         this.is4K = is4K;
+        console.log("is 4K:",this.is4K);
     }
 
     initNumber(num: number) {
