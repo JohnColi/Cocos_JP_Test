@@ -53,7 +53,7 @@ export class JackpotManager extends Component {
     @property(Label)
     timerLabel: Label;
     clickDebugTimes = 0;
-    isDebugMode = false;
+    isDebugMode = true;
     isDebugTimer = false;
     debugTimer = 0;
 
@@ -102,7 +102,7 @@ export class JackpotManager extends Component {
                         self.showJackpotIdle(_data.amount);
                         break;
                     case "hitJackpot":
-                        self.showJackpotTopWin(_data.amount, _data.msg, _data.successCallback);
+                        self.showJackpotTopWin(_data.amount, _data.msg, _data.successCallback, _data.type);
                         break;
                     case "otherWinJackpot":
                         self.showOtherJackpotWin(_data.amount, _data.msg, _data.successCallback);
@@ -125,7 +125,7 @@ export class JackpotManager extends Component {
 
         //ftp://ftp.calda.win/lax/7001/clients/0.0.2?theme_color=Green&display_model=normal&resolution=4K&amount=30000
 
-        let _v = "Ver. 0.0.3";
+        let _v = "Ver. 0.0.5";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
 
@@ -286,7 +286,7 @@ export class JackpotManager extends Component {
                 break;
         }
 
-        if (EDITOR || PREVIEW || this.isDebugMode) {
+        if (EDITOR ||  this.isDebugMode) {
             url = url;
             // if (this.displayModel != eDisplayModel.Normal)
             //      view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
@@ -491,8 +491,12 @@ export class JackpotManager extends Component {
             this.numberManager.initNumber(num)
     }
 
-    showJackpotTopWin(num: number, msg: string, successCallback = null) {
+    showJackpotTopWin(num: number, msg: string, successCallback = null, type = "top") {
         if (num == null) { console.error("win number is null"); num = 0; }
+        // if (type == "inGame") {
+        //     this.showJackpotWin(num, successCallback);
+        //     return;
+        // }
         this.numberManager.initNumber(num);
         let hideMsg: Function;
 
@@ -629,7 +633,7 @@ enum eJackpotState {
     InGameWinStart = "InGame_PlayerWin_Start",
     TopIdle = "Top_Idle1",
     TopOtherWin = "Top_Win",
-    TopWin = "Top_Winp_Player",
+    TopWin = "Top_Win_Player",
 }
 enum eResolution {
     _2K = "2k",

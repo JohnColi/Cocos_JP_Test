@@ -8,7 +8,7 @@ export class JackpotBanner extends Component {
     @property(Label)
     msg: Label;
     isShowBanner: boolean = false;
-    animTimer = 5;
+    animTimer = 28;
 
     start() {
         window.banner = new Object();

@@ -3,6 +3,8 @@
 | changeColor        | color      | `string`     | 更換主題色的顏色, 全部小寫,ex:`blue`, `red` |
 | hitJackpot         | amount       | `number`    | 當前玩家中獎, 獎金顯示`amount` |
 |                               | msg       | `string`    | 當前玩家中獎, 彈窗訊息`msg` |
+|                               | msg       | `string`    | 當前玩家中獎, 彈窗訊息`msg` |
+
 | ohterWinJackpot    | amount       | `number`    | 其他玩家中獎, 獎金顯示`amount` |
 |                               | msg       | `string`    | 其他玩家中獎, 彈窗訊息`msg` |
 | initJackpot        | amount       | `number`    | 設定獎金池金額`amount`  |
