@@ -362,7 +362,7 @@ export class DigitRun extends Component {
         this.needRunTimes = this.target_n - this.curent_n;
         this.needRunTimes = this.needRunTimes < 0 ? this.needRunTimes + 10 : this.needRunTimes;
         this.runnedTimes = 0;
-        console.log("[toTargetNumber], cur:", this.curent_n, " target:", this.target_n);
+        // console.log("[toTargetNumber], cur:", this.curent_n, " target:", this.target_n);
         this.runState = eRunState.Next;
 
         if (callback)

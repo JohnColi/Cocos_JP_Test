@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate } from 'cc';
+import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, CCBoolean } from 'cc';
 import { DigitRun } from './DigitRun';
 import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
@@ -26,7 +26,7 @@ export class NumberManager extends Component {
     /**已經停止到哪一個dig */digStopped_i = 0;
     DigitRunState: eDigitRunState = eDigitRunState.SequentiallyChange;
 
-    @property(Boolean)
+    @property(CCBoolean)
     is4K = false;
 
     digitData = [{ h: 238, w: 64, rate: 1 }, { h: 357, w: 96, rate: 1.5 }];
@@ -123,10 +123,10 @@ export class NumberManager extends Component {
         let self = this;
         let clearComplete: Function = () => {
             self.clearedCount++;
-            console.log("clear complete , ", self.clearedCount);
+            // console.log("clear complete , ", self.clearedCount);
             if (self.clearedCount >= self.needClearCount) {
                 self.clearedCount = 0;
-                console.log("清理完畢");
+                // console.log("清理完畢");
                 self.initNumber_2();
             }
         };
@@ -144,7 +144,7 @@ export class NumberManager extends Component {
         }
         let _str = this.tarNumber.toFixed(2);
         this.curNumber = Number.parseFloat(_str);
-        console.log("initNumber_2:", this.curNumber);
+        // console.log("initNumber_2:", this.curNumber);
         // 使用正则表达式添加千位分隔符
         _str = _str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         let _s = _str.split(``);
@@ -167,7 +167,7 @@ export class NumberManager extends Component {
                     digit.creatDotComma(".", null, 1000);
             }
             else {
-                console.log(_n);
+                // console.log(_n);
                 digit.creatNumber(_n, null, (_n + 9) % 10);
             }
         }
@@ -344,7 +344,7 @@ export class NumberManager extends Component {
             needOpen = true;
         }
 
-        console.log("[digitCarry], i:", s_i, "  n:", _n);
+        // console.log("[digitCarry], i:", s_i, "  n:", _n);
         if (isNaN(_n)) {
             if (needCreator || needOpen) {
                 if (this.curTargetArr[s_i]) {

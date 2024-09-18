@@ -1,5 +1,5 @@
 import { _decorator, Button, Color, Component, instantiate, Node, Prefab, sp, Vec3, Label, resources, find, editorExtrasTag, view, Size } from 'cc';
-import { assetManager, AudioSource, tween } from 'cc';
+import { assetManager, AudioSource, tween, math } from 'cc';
 import { ResolutionPolicy, screen } from 'cc';
 import { JackpotBanner } from './JackpotBanner';
 import { NumberManager } from './NumberManager';
@@ -44,7 +44,8 @@ export class JackpotManager extends Component {
     resolution = eResolution._2K;
     is4K = false;
     isHaveAmount = false;
-
+    isHitJackpot = false;
+    /**假的自己跑分數 */ isDemoMode = false;
     msgSchedule = null;
 
     // debug
@@ -59,6 +60,8 @@ export class JackpotManager extends Component {
 
     /**初始化用 */ progressCount = 0;
     isLoadingFinished = false;
+
+    needtoShowInGameJackpot = false;
 
     //3840 x 2160
     //3840 x 1690
@@ -90,6 +93,8 @@ export class JackpotManager extends Component {
         window.api.setResolution = this.resolutionTest.bind(this);
         window.api.setScreen = this.setScreenTest.bind(this);
 
+        window.api.test = this.testLoading.bind(this);
+
         let self = this;
         //postmessage
         window.addEventListener('message', function (e) {
@@ -102,7 +107,7 @@ export class JackpotManager extends Component {
                         self.showJackpotIdle(_data.amount);
                         break;
                     case "hitJackpot":
-                        self.showJackpotTopWin(_data.amount, _data.msg, _data.successCallback, _data.type);
+                        self.showJackpotTopWin(_data.amount, _data.msg, _data.type, _data.successCallback);
                         break;
                     case "otherWinJackpot":
                         self.showOtherJackpotWin(_data.amount, _data.msg, _data.successCallback);
@@ -125,7 +130,7 @@ export class JackpotManager extends Component {
 
         //ftp://ftp.calda.win/lax/7001/clients/0.0.2?theme_color=Green&display_model=normal&resolution=4K&amount=30000
 
-        let _v = "Ver. 0.0.5";
+        let _v = "Ver. 0.0.7";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
 
@@ -139,9 +144,9 @@ export class JackpotManager extends Component {
     start() {
         this.bgm = this.getComponent(AudioSource);
         if (EDITOR || this.isDebugMode) {
-            this.displayModel = eDisplayModel.Hybrid;
-            this.resolution = eResolution._4K;
-            this.themeColor = eColor.Purple;
+            this.displayModel = eDisplayModel.Normal;
+            this.resolution = eResolution._2K;
+            this.themeColor = eColor.Red;
             // @ts-ignore 要防呆
             if (this.displayModel == eDisplayModel.Hybrid || (this.displayModel == eDisplayModel.Normal && this.resolution == eResolution._4K)) {
                 this.resolution = eResolution._4K;
@@ -150,6 +155,11 @@ export class JackpotManager extends Component {
                 this.resolution = eResolution._2K;
                 this.is4K = false;
             }
+
+            // this.isHitJackpot = true;
+
+            this.isHaveAmount = true;
+            this.curNum = 5000;
 
             this.changeBundle();
             this.setResolution();
@@ -172,8 +182,24 @@ export class JackpotManager extends Component {
         // }
         if (!this.isLoadingFinished && this.progressCount >= 2) {
             this.isLoadingFinished = true;
-            if (this.isHaveAmount)
-                this.showJackpotIdle(this.curNum);
+            this.jpMask.active = this.displayModel == eDisplayModel.Thin; //暫時解
+
+            if (this.needtoShowInGameJackpot) {
+                // console.log(">>> 開始表演");
+                this.showJackpotWin(this.targetNum, this.jackpotCompleteCallback)
+                return;
+            }
+
+            if (this.isHitJackpot) {
+                this.showJackpotIdle(2000);
+            }
+            else {
+                // if (this.isHaveAmount)
+                //     this.showJackpotIdle(this.curNum);
+
+                if (this.isDemoMode)
+                    this.demoUpdateAmount();
+            }
         }
     }
 
@@ -203,9 +229,19 @@ export class JackpotManager extends Component {
                     } else if (keyValuePair[0] === "amount") {
                         let v = Number.parseFloat(keyValuePair[1]);
                         if (v) {
-                            console.warn("有初始金額:", keyValuePair[1]);
+                            console.log("有初始金額:", keyValuePair[1]);
                             this.isHaveAmount = true;
                             this.curNum = v;
+                        }
+                    } else if (keyValuePair[0] === "hitJackpot") {
+                        if (keyValuePair[1]) {
+                            this.isHitJackpot = true;
+                        }
+                    }
+                    else if (keyValuePair[0] === "demoMode") {
+                        if (keyValuePair[1]) {
+                            console.warn("展示模式")
+                            this.isDemoMode = true;
                         }
                     }
                 }
@@ -286,12 +322,12 @@ export class JackpotManager extends Component {
                 break;
         }
 
-        if (EDITOR ||  this.isDebugMode) {
+        if (EDITOR || this.isDebugMode) {
             url = url;
             // if (this.displayModel != eDisplayModel.Normal)
             //      view.setDesignResolutionSize(3810, 2160, ResolutionPolicy.FIXED_HEIGHT);
         } else {
-            const domainUrl = "https://prd10-icontent.calda.win/lax/7001/assets/0.0.1/"
+            const domainUrl = "https://prd10-icontent.calda.win/lax/7001/assets/0.0.2/"
             url = domainUrl + url;
         }
 
@@ -395,13 +431,17 @@ export class JackpotManager extends Component {
                 if (self.displayModel == eDisplayModel.Thin) {
                     obj.setPosition(new Vec3(self.thin_numberData.x, self.thin_numberData.y, 1));
                 }
-                self.progressCount++;
+                self.scheduleOnce(()=>{
+                    self.jpMask.active = false;
+                    self.progressCount++;
+                })
             });
         }
     }
 
     //#region Game Win
-    public showJackpotWin(num: number, jackpotCompleteCallback = null, errorCallback = null) {
+    /**inGame Jackpot */
+    public showJackpotWin(num: number, jackpotCompleteCallback: Function = null, errorCallback: Function = null) {
         if (this.displayModel == eDisplayModel.Thin) {
             console.error("displayModel:Thin , can't play in Game Jackpot!")
             return;
@@ -409,6 +449,15 @@ export class JackpotManager extends Component {
         if (num == null) {
             console.error("win number is null");
             num = 0;
+        }
+
+        this.targetNum = num;
+        this.jackpotCompleteCallback = jackpotCompleteCallback;
+
+        if (!this.isLoadingFinished) {
+            this.needtoShowInGameJackpot = true;
+            console.warn("[showJackpotWin] jackpot loading....");
+            return;
         }
 
         if (this.runJPschedule) {
@@ -419,11 +468,9 @@ export class JackpotManager extends Component {
         this.bgm.play();
         this.jackpotSke.node.active = true;
         this.jpMask.active = false;
-        this.jackpotCompleteCallback = jackpotCompleteCallback;
         this.jackpotSke.setAnimation(0, eJackpotState.InGameWinStart, false);
 
         // this.timerStart();
-        this.targetNum = num;
 
         let _i = this.resolution == eResolution._2K ? 0 : 1;
         let gameWinPosY = this.labelPosY_GameWin[_i];
@@ -441,6 +488,7 @@ export class JackpotManager extends Component {
         let self = this;
         this.jackpotSke.setCompleteListener(() => {
             self.jackpotSke.setCompleteListener(null)
+            console.log("[ShowJackpotWin] jackpot complete");
             // 預留秀彈窗 處理
             self.jackpotSke.setAnimation(0, eJackpotState.InGameWinLoop, true);
             self.close_btn.node.active = true;
@@ -448,10 +496,12 @@ export class JackpotManager extends Component {
         });
     }
     public JackpotComplete() {
+        console.log("[JackpotComplete]");
         this.jackpotSke.node.active = false;
         this.jpMask.active = false;
-        if (this.jackpotCompleteCallback)
+        if (this.jackpotCompleteCallback) {
             this.jackpotCompleteCallback();
+        }
         else
             console.warn("Not find JackpotComplete callback");
 
@@ -491,12 +541,12 @@ export class JackpotManager extends Component {
             this.numberManager.initNumber(num)
     }
 
-    showJackpotTopWin(num: number, msg: string, successCallback = null, type = "top") {
+    showJackpotTopWin(num: number, msg: string, type = "top", successCallback: Function = null) {
         if (num == null) { console.error("win number is null"); num = 0; }
-        // if (type == "inGame") {
-        //     this.showJackpotWin(num, successCallback);
-        //     return;
-        // }
+        if (type == "inGame") {
+            this.showJackpotWin(num, successCallback);
+            return;
+        }
         this.numberManager.initNumber(num);
         let hideMsg: Function;
 
@@ -624,6 +674,23 @@ export class JackpotManager extends Component {
     onTouch_JackpotClose() {
         this.JackpotComplete();
         this.close_btn.node.active = false;
+    }
+
+    testGamwWin() {
+        this.showJackpotTopWin(234567.43, "You won the jackpot!", "inGame", () => {
+            console.log("Show Jackpot Complete");
+        })
+    }
+    testLoading() {
+        this.progressCount++;
+    }
+    demoUpdateAmount() {
+        let self = this;
+        let add: Function = function () {
+            let r = math.randomRange(15, 186)
+            self.numberManager.addNumber(r);
+        }
+        this.schedule(add, 20, Number.MAX_VALUE, 5);
     }
     //#endregion
 }

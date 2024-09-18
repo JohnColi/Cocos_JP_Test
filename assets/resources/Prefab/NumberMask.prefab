@@ -729,7 +729,7 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 136,
+      "width": 62,
       "height": 238
     }
   },
@@ -748,7 +748,7 @@
       "_spriteFrame"
     ],
     "value": {
-      "__uuid__": "36da761d-06e6-4cd8-85c1-cdac5ff716e4@f9941",
+      "__uuid__": "8ce3e7d0-6e3b-43a7-8692-7a4d21a62ae1@f9941",
       "__expectedType__": "cc.SpriteFrame"
     }
   },
@@ -1228,7 +1228,8 @@
     "fileId": "94KtsSAYpJTYpBZGPvnkpD",
     "instance": {
       "__id__": 84
-    }
+    },
+    "targetOverrides": null
   },
   {
     "__type__": "cc.PrefabInstance",

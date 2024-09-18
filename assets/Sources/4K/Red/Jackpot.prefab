@@ -114,7 +114,7 @@
       "__expectedType__": "sp.SkeletonData"
     },
     "defaultSkin": "default",
-    "defaultAnimation": "Top_Idle1",
+    "defaultAnimation": "<None>",
     "_premultipliedAlpha": true,
     "_timeScale": 1,
     "_preCacheMode": 0,
@@ -141,6 +141,7 @@
       "__id__": 0
     },
     "fileId": "5fx67rJTNLV4ZRyE0peA10",
+    "instance": null,
     "targetOverrides": null
   }
 ]
