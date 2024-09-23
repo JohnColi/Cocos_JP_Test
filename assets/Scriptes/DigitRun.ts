@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Sprite, UITransform, Vec2, Vec3, Enum } from 'cc';
+import { _decorator, CCBoolean, Component, Node, Sprite, UITransform, Vec2, Vec3, Enum } from 'cc';
 import { NumberManager, eNumber } from './NumberManager';
 const { ccclass, property } = _decorator;
 
@@ -11,14 +11,16 @@ enum eResolution {
 export class DigitRun extends Component {
     @property({ step: 1 }) id: number = 0;
     @property({ type: Enum(eResolution) })
+    /**原始的scale, 小數點以下是0.75 */ @property({ step: 1 }) scale = 1;
+    @property(CCBoolean) isAfterDecimal = false;
     resolution: eResolution = eResolution._2K;
 
     digits: { node: Node, sp: Sprite }[] = [];
     curent_n = 0;
     target_n = 0
     manager: NumberManager;
-    /** 符號用的寬度*/ w = 64;  // 64/96
-    h = 238; // 357/238 = 1.5倍
+    /** 符號用的寬度*/ w_dot = 64;  // 64/96
+    size = { w: 136, h: 238 } // 204/136, 357/238
     /** 依據2K,4K調整速率參數*/ rate = 1;
     runState = eRunState.Idle;
     /**中間的圖片index */ index = 1;
@@ -94,9 +96,9 @@ export class DigitRun extends Component {
         }
     }
 
-    setRectData(data: { h, w, rate }) {
-        this.h = data.h;
-        this.w = data.w;
+    setRectData(data: { h, w, w_dot, rate }) {
+        this.size = { w: data.w, h: data.h };
+        this.w_dot = data.w_dot;
         this.rate = data.rate;
         this.resolution = data.h >= 350 ? eResolution._4K : eResolution._2K;
     }
@@ -119,7 +121,7 @@ export class DigitRun extends Component {
         for (let i = 0; i < this.digits.length; i++) {
             let _d = this.digits[i].node
             let pos = new Vec3(_d.position);
-            pos.y = this.h * (1 - i);
+            pos.y = this.size.h * (1 - i);
             _d.position = pos;
         }
     }
@@ -140,7 +142,7 @@ export class DigitRun extends Component {
             pos.y += dt * _speed * this.rate;
             this.digits[i].node.position = pos;
 
-            if (pos.y > this.h) {
+            if (pos.y > this.size.h) {
                 needMove_i = i;
             }
         }
@@ -161,7 +163,7 @@ export class DigitRun extends Component {
             // console.log("needMove_i:", needMove_i, ", next_i:", next_i);
             let digit = this.digits[needMove_i];
             let pos = new Vec3(digit.node.position);
-            pos.y = this.digits[next_i].node.position.y - this.h;
+            pos.y = this.digits[next_i].node.position.y - this.size.h;
             digit.node.position = pos;
             digit.sp.spriteFrame = this.manager.number_spf[(this.curent_n + 2) % 10];
 
@@ -185,7 +187,11 @@ export class DigitRun extends Component {
                 this.checkCallback();
         }
     }
-
+    /**
+     * 
+     * @param speed 速度
+     * @param times 幾次
+     */
     startRun(speed: number, times: number) {
         this.speed_running = speed;
         this.needRunTimes = times;
@@ -200,7 +206,7 @@ export class DigitRun extends Component {
             let _d = this.digits[i_arr[i]].node
             // console.log("dig:", _d.name);
             let pos = new Vec3(_d.position);
-            pos.y = this.h * (-1 + i);
+            pos.y = this.size.h * (-1 + i);
             _d.position = pos;
         }
     }
@@ -222,7 +228,7 @@ export class DigitRun extends Component {
                 for (let i = 0; i < this.digits.length; i++) {
                     let _d = this.digits[i].node
                     let pos = new Vec3(_d.position);
-                    pos.y = this.h * (1 - i);
+                    pos.y = this.size.h * (1 - i);
                     _d.position = pos;
                 }
             }
@@ -241,7 +247,7 @@ export class DigitRun extends Component {
      * @param index 要改哪一個位置
      */
     initDotComma(str: string, index = 1) {
-        this.node.getComponent(UITransform).width = this.w;
+        this.node.getComponent(UITransform).width = this.w_dot;
         this.resetDigPos();
         if (str == ',') {
             this.digits[index].sp.spriteFrame = this.manager.number_spf[eNumber.Comma];
@@ -276,17 +282,25 @@ export class DigitRun extends Component {
         this.toTargetNumber(num, callback);
     }
 
-    /** */
-    creatDotComma(str: string, callback = null, speed: number = 0) {
+    /**
+     * 
+     * @param str "," "."
+     * @param callback 
+     * @param speed 
+     */
+    creatDotComma(str: string, speed: number, callback = null) {
         this.Init();
-        this.initDotComma(str, 2);
         if (callback)
             this.completeCallback = callback;
 
-        if (speed <= 0) {
+        if (speed == 0) {
             this.runState = eRunState.Creator;
+            this.initDotComma(str, 2);
+        } else if (speed < 0) {
+            this.initDotComma(str, 1);  //直接要在中間
         }
         else {
+            this.initDotComma(str, 2);
             this.startRun(speed, 1);
         }
     }
@@ -381,6 +395,14 @@ export class DigitRun extends Component {
             default:
                 console.error("超過2");
                 return newIndices = [2, 1, 0];
+        }
+    }
+    /**調整大小 */
+    setScale(scale = 1) {
+        for (let i = 0; i < this.digits.length; i++) {
+            let _node = this.digits[i].node;
+            let v = new Vec3(_node.scale.x * scale, _node.scale.y * scale, 1);
+            _node.setScale(v);
         }
     }
 }

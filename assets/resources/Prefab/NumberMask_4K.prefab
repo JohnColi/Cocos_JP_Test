@@ -1340,6 +1340,9 @@
     "php_node": {
       "__id__": 3
     },
+    "currencySp": {
+      "__id__": 6
+    },
     "dig_pfb": {
       "__uuid__": "61b6757f-967c-4a41-aaa6-8de8583d673c",
       "__expectedType__": "cc.Prefab"

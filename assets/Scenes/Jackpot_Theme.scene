@@ -190,7 +190,7 @@
     "_priority": 0,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 1080,
+    "_orthoHeight": 1101.704905063291,
     "_near": 0,
     "_far": 1000,
     "_color": {
@@ -198,7 +198,7 @@
       "r": 255,
       "g": 255,
       "b": 163,
-      "a": 255
+      "a": 0
     },
     "_depth": 1,
     "_stencil": 0,

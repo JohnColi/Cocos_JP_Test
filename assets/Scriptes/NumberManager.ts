@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, CCBoolean } from 'cc';
+import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, CCBoolean, Sprite } from 'cc';
 import { DigitRun } from './DigitRun';
 import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
@@ -6,6 +6,7 @@ const { ccclass, property } = _decorator;
 @ccclass('NumberManager')
 export class NumberManager extends Component {
     @property(Node) php_node: Node;
+    @property(Sprite) currencySp: Sprite;
     @property(Prefab) dig_pfb: Prefab;
     digits: DigitRun[] = [];
 
@@ -13,6 +14,7 @@ export class NumberManager extends Component {
     number_spf: SpriteFrame[] = [];
     /**貨幣的圖片 */
     @property(CurrencyRun) currencyRun: CurrencyRun;
+    @property(CCBoolean) is4K = false;
 
     curNumber: number = 0;
     tarNumber: number = 0;
@@ -26,11 +28,7 @@ export class NumberManager extends Component {
     /**已經停止到哪一個dig */digStopped_i = 0;
     DigitRunState: eDigitRunState = eDigitRunState.SequentiallyChange;
 
-    @property(CCBoolean)
-    is4K = false;
-
-    digitData = [{ h: 238, w: 64, rate: 1 }, { h: 357, w: 96, rate: 1.5 }];
-    
+    digitData = [{ h: 238, w: 136, w_dot: 64, rate: 1 }, { h: 357, w: 204, w_dot: 96, rate: 1.5 }];
     speed_faset = 2000;
 
     start() {
@@ -59,7 +57,7 @@ export class NumberManager extends Component {
 
     init(is4K: boolean) {
         this.is4K = is4K;
-        console.log("is 4K:",this.is4K);
+        console.log("is 4K:", this.is4K);
     }
 
     initNumber(num: number) {
@@ -102,7 +100,7 @@ export class NumberManager extends Component {
                     digNumber++;
                 }
                 else {
-                    this.digits[dig_i].creatDotComma(_s[i]);
+                    this.digits[dig_i].creatDotComma(_s[i], -1);
                 }
                 dig_i--;
             }
@@ -162,9 +160,9 @@ export class NumberManager extends Component {
             if (isNaN(_n)) {
                 console.log(_s[s_i]);
                 if (_s[s_i] == ",")
-                    digit.creatDotComma(",", null, 1000);
+                    digit.creatDotComma(",", 1000);
                 else
-                    digit.creatDotComma(".", null, 1000);
+                    digit.creatDotComma(".", 1000);
             }
             else {
                 // console.log(_n);
@@ -289,7 +287,7 @@ export class NumberManager extends Component {
             if (needCreator || needOpen) {
                 if (this.curTargetArr[s_i]) {
                     this.digits[d_i].node.active = true;
-                    this.digits[d_i].creatDotComma(",", this.checkDigitCarry.bind(this, next_i));
+                    this.digits[d_i].creatDotComma(",", 0, this.checkDigitCarry.bind(this, next_i));
                 }
                 else
                     console.error("strArr[s_i] is error,", this.curTargetArr[s_i]);
@@ -349,7 +347,7 @@ export class NumberManager extends Component {
             if (needCreator || needOpen) {
                 if (this.curTargetArr[s_i]) {
                     this.digits[d_i].node.active = true;
-                    this.digits[d_i].creatDotComma(",", this.digitCarry.bind(this));
+                    this.digits[d_i].creatDotComma(",", 0, this.digitCarry.bind(this));
                 }
                 else
                     console.error("strArr[s_i] is error,", this.curTargetArr[s_i]);
@@ -382,7 +380,7 @@ export class NumberManager extends Component {
     }
 
     /** 檢查digit數量是否大於數字*/
-    chececkDigitsEnough(num): boolean {
+    checkDigitsEnough(num): boolean {
         let _str = num.toFixed(2);
         this.curNumber = Number.parseFloat(_str);
         console.log("InitNumber:", this.curNumber);
@@ -394,6 +392,34 @@ export class NumberManager extends Component {
         let b = digCount >= _s.length
         return b;
     }
+
+    /**檢查位數 超過9位數 */
+    checkDigitsCount() {
+        let scale = 1;
+        if (this.curNumber > 999999999) {
+            scale = 0.85;
+        }
+
+        for (let i = 0; i < this.digits.length; i++) {
+
+        }
+    }
+
+    //#region currency
+    setCurrency(cur: string) {
+
+        switch (cur) {
+            case "usd":
+                break;
+            case "php":
+                break;
+            default:
+                console.warn("Not Find currency, cur:", cur);
+                break;
+        }
+    }
+
+    //#endregion
 }
 
 export enum eNumber {
@@ -410,4 +436,16 @@ enum eDigitRunState {
     SequentiallyChange,
     SequentiallyStart,
     carryRun,   //10進位
+}
+
+enum eCurrency {
+    KHR, //: Khmer (柬埔寨) → km_KH
+    KRW, // Korean (韩国) → ko_KR
+    MYR, // Malay (马来西亚) → ms_MY 或 zh_MY（如果是中文使用者）
+    PHP, //Filipino(菲律宾) → fil_PH 或 en_PH
+    RUB, //Russian(俄罗斯) → ru_RU
+    SGD, //English(新加坡) → en_SG 或 zh_SG（如果是中文使用者）
+    THB, //Thai(泰国) → th_TH
+    USD, //English(美国) → en_US
+    VND, //Vietnamese(越南) → vi_VN
 }

@@ -42,6 +42,7 @@ export class JackpotManager extends Component {
     displayModel = eDisplayModel.Normal;
     themeColor = eColor.Red;
     resolution = eResolution._2K;
+    currency: string = '';
     is4K = false;
     isHaveAmount = false;
     isHitJackpot = false;
@@ -54,14 +55,14 @@ export class JackpotManager extends Component {
     @property(Label)
     timerLabel: Label;
     clickDebugTimes = 0;
-    isDebugMode = true;
+    isDebugMode = false;
     isDebugTimer = false;
     debugTimer = 0;
 
     /**初始化用 */ progressCount = 0;
     isLoadingFinished = false;
 
-    needtoShowInGameJackpot = false;
+    /**需要 */ needtoShowInGameJackpot = false;
 
     //3840 x 2160
     //3840 x 1690
@@ -130,7 +131,7 @@ export class JackpotManager extends Component {
 
         //ftp://ftp.calda.win/lax/7001/clients/0.0.2?theme_color=Green&display_model=normal&resolution=4K&amount=30000
 
-        let _v = "Ver. 0.0.7";
+        let _v = "Ver. 0.0.9";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
 
@@ -194,8 +195,9 @@ export class JackpotManager extends Component {
                 this.showJackpotIdle(2000);
             }
             else {
-                // if (this.isHaveAmount)
-                //     this.showJackpotIdle(this.curNum);
+                if (this.displayModel != eDisplayModel.Game /* && this.isHaveAmount*/) {
+                    this.showJackpotIdle(this.curNum);
+                }
 
                 if (this.isDemoMode)
                     this.demoUpdateAmount();
@@ -233,6 +235,8 @@ export class JackpotManager extends Component {
                             this.isHaveAmount = true;
                             this.curNum = v;
                         }
+                    } else if (keyValuePair[0] === "currency") {
+                        this.currency = keyValuePair[1].toLowerCase();
                     } else if (keyValuePair[0] === "hitJackpot") {
                         if (keyValuePair[1]) {
                             this.isHitJackpot = true;
@@ -300,6 +304,9 @@ export class JackpotManager extends Component {
             case "hybrid":
                 this.displayModel = eDisplayModel.Hybrid;
                 break;
+            case "game":
+                this.displayModel = eDisplayModel.Game;
+                break;
             default:
                 console.error(`Unknown display model: ${v}`);
                 this.displayModel = eDisplayModel.Normal;
@@ -311,13 +318,14 @@ export class JackpotManager extends Component {
         let url = this.themeColor.toString();
         switch (this.displayModel) {
             case eDisplayModel.Normal:
+            case eDisplayModel.Game:
                 let _r = this.resolution == eResolution._2K ? "" : "4K";
                 url = url + _r;
                 break;
             case eDisplayModel.Thin:
                 url = url + "B"
                 break;
-            case eDisplayModel.Hybrid:
+            case eDisplayModel.Hybrid:  //目前只有4K
                 url = url + "4KH";
                 break;
         }
@@ -425,13 +433,14 @@ export class JackpotManager extends Component {
                 self.jpMask = obj;
                 self.numberManager = obj.children[0].getComponent(NumberManager);
                 self.numberManager.init(self.is4K);
+                self.numberManager.setCurrency(self.currency);
                 if (needScale) {
                     obj.setScale(new Vec3(this.scale_hybrid, this.scale_hybrid, 1));
                 }
                 if (self.displayModel == eDisplayModel.Thin) {
                     obj.setPosition(new Vec3(self.thin_numberData.x, self.thin_numberData.y, 1));
                 }
-                self.scheduleOnce(()=>{
+                self.scheduleOnce(() => {
                     self.jpMask.active = false;
                     self.progressCount++;
                 })
@@ -534,7 +543,7 @@ export class JackpotManager extends Component {
 
         this.targetNum = num;
         // 是否已經有digits
-        let b = this.numberManager.chececkDigitsEnough(num);
+        let b = this.numberManager.checkDigitsEnough(num);
         if (b)
             this.numberManager.clearNumber(num);
         else
@@ -710,7 +719,7 @@ enum eDisplayModel {
     Normal = "",
     Thin = "B",
     Hybrid = "H",
-    // Game = 
+    Game = "Game",
 }
 
 enum eColor {
