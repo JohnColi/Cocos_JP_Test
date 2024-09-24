@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, CCBoolean, Sprite } from 'cc';
+import { _decorator, Component, Node, Prefab, RichText, SpriteFrame, isValid, instantiate, CCBoolean, Sprite, Label } from 'cc';
 import { DigitRun } from './DigitRun';
 import { CurrencyRun } from './CurrencyRun';
 const { ccclass, property } = _decorator;
@@ -6,8 +6,8 @@ const { ccclass, property } = _decorator;
 @ccclass('NumberManager')
 export class NumberManager extends Component {
     @property(Node) php_node: Node;
-    @property(Sprite) currencySp: Sprite;
     @property(Prefab) dig_pfb: Prefab;
+    @property(Label) currencyLabel: Label;
     digits: DigitRun[] = [];
 
     @property([SpriteFrame])
@@ -50,7 +50,6 @@ export class NumberManager extends Component {
             window.jo.addNumber = this.addNumber.bind(this);
             // @ts-ignore
             window.jo.resetNumber = this.clearNumber.bind(this)
-
             // this.scheduleOnce(() => { this.initNumber(100) }, 0.1)
         }
     }
@@ -407,15 +406,12 @@ export class NumberManager extends Component {
 
     //#region currency
     setCurrency(cur: string) {
-
-        switch (cur) {
-            case "usd":
-                break;
-            case "php":
-                break;
-            default:
-                console.warn("Not Find currency, cur:", cur);
-                break;
+        if (cur && cur != ""){
+            let s = cur.toUpperCase();
+            this.currencyLabel.string = s;
+        }
+        else {
+            console.error("currency is error!!  cur:", cur);
         }
     }
 
@@ -439,6 +435,7 @@ enum eDigitRunState {
 }
 
 enum eCurrency {
+    JPC, //Jackpot currency
     KHR, //: Khmer (柬埔寨) → km_KH
     KRW, // Korean (韩国) → ko_KR
     MYR, // Malay (马来西亚) → ms_MY 或 zh_MY（如果是中文使用者）

@@ -43,6 +43,7 @@ export class JackpotManager extends Component {
     themeColor = eColor.Red;
     resolution = eResolution._2K;
     currency: string = '';
+    localization = "en_us";
     is4K = false;
     isHaveAmount = false;
     isHitJackpot = false;
@@ -91,9 +92,14 @@ export class JackpotManager extends Component {
 
         // @ts-ignore
         window.api.changeColor = this.changeThemeColor.bind(this);
+        // @ts-ignore
+        window.api.setCurrency = this.setCurrency.bind(this);
+        // @ts-ignore
+        window.api.setLanguage = this.setLanguage.bind(this);
+
+        window.api.addAmount = this.addAmount.bind(this);
         window.api.setResolution = this.resolutionTest.bind(this);
         window.api.setScreen = this.setScreenTest.bind(this);
-
         window.api.test = this.testLoading.bind(this);
 
         let self = this;
@@ -122,6 +128,9 @@ export class JackpotManager extends Component {
                     case "changeColor":
                         self.changeThemeColor(_data.color);
                         break;
+                    case "setCurrency":
+                        self.setCurrency(_data.currency);
+                        break;
                     default:
                         console.error("postmessage 找不到該事件,", _data.event);
                         break;
@@ -131,7 +140,7 @@ export class JackpotManager extends Component {
 
         //ftp://ftp.calda.win/lax/7001/clients/0.0.2?theme_color=Green&display_model=normal&resolution=4K&amount=30000
 
-        let _v = "Ver. 0.0.9";
+        let _v = "Ver. 0.0.10";
         console.log("jp_p ", _v);
         this.versionLabel.string = _v;
 
@@ -289,6 +298,20 @@ export class JackpotManager extends Component {
                 console.error(`未知的顏色：${lowercasedColor}`);
                 this.themeColor = eColor.Red;
                 return;
+        }
+    }
+
+    setCurrency(cur: string) {
+        this.currency = cur;
+        this.numberManager.setCurrency(cur);
+    }
+    setLanguage(lang) {
+        if (lang && lang != "") {
+            this.localization = lang;
+        }
+        else {
+            console.warn("not find language!!");
+            this.localization = "en_us"
         }
     }
 
@@ -685,6 +708,14 @@ export class JackpotManager extends Component {
         this.close_btn.node.active = false;
     }
 
+    addAmount(amount: number) {
+        this.targetNum = this.curNum + amount;
+        this.updateJackpot(this.targetNum);
+        this.curNum = this.targetNum;
+    }
+    //#endregion
+
+    //#region  debug
     testGamwWin() {
         this.showJackpotTopWin(234567.43, "You won the jackpot!", "inGame", () => {
             console.log("Show Jackpot Complete");

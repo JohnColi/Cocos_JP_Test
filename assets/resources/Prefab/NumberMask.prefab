@@ -140,7 +140,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "txt_PHP",
+    "_name": "Currency",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -205,8 +205,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 253,
-      "height": 116
+      "width": 269.32,
+      "height": 115
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -217,10 +217,10 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "25ZZElJxRGEbOlCzHQ8QbF"
+    "fileId": "47c6nFwz5FYKQwnTngUD9+"
   },
   {
-    "__type__": "cc.Sprite",
+    "__type__": "cc.Label",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -241,28 +241,54 @@
       "b": 255,
       "a": 255
     },
-    "_spriteFrame": {
-      "__uuid__": "be2e505a-4bb4-4ea2-b73d-024aa3f68660@f9941",
-      "__expectedType__": "cc.SpriteFrame"
+    "_string": "PHP",
+    "_horizontalAlign": 1,
+    "_verticalAlign": 1,
+    "_actualFontSize": 116,
+    "_fontSize": 116,
+    "_fontFamily": "Arial",
+    "_lineHeight": 115,
+    "_overflow": 0,
+    "_enableWrapText": true,
+    "_font": {
+      "__uuid__": "045f5b02-468c-4840-8461-02d1e9752486",
+      "__expectedType__": "cc.BitmapFont"
     },
-    "_type": 0,
-    "_fillType": 0,
-    "_sizeMode": 1,
-    "_fillCenter": {
+    "_isSystemFontUsed": false,
+    "_spacingX": 0,
+    "_isItalic": false,
+    "_isBold": false,
+    "_isUnderline": false,
+    "_underlineHeight": 2,
+    "_cacheMode": 0,
+    "_enableOutline": false,
+    "_outlineColor": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    },
+    "_outlineWidth": 2,
+    "_enableShadow": false,
+    "_shadowColor": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    },
+    "_shadowOffset": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
+      "x": 2,
+      "y": 2
     },
-    "_fillStart": 0,
-    "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_useGrayscale": false,
-    "_atlas": null,
+    "_shadowBlur": 2,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "75azZCHOdNfKUfYEGEdWcK"
+    "fileId": "f325wzsrFL/IfDG6Q1V4x9"
   },
   {
     "__type__": "8592eFUZfxCUKhvIYTaqhtK",
@@ -280,7 +306,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "7bTUBQ34pHUpkH0IPoIzjO"
+    "fileId": "33nM1c1FNMsrelTLFQ0afK"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -290,7 +316,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "a46Wl3KYNOo5jt4cS7RFmY",
+    "fileId": "20Ox5arFtIWb+sDAgwsvxQ",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -377,7 +403,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": -94.5,
+      "x": -86.34,
       "y": -19.465333333333433,
       "z": 0
     }
@@ -521,7 +547,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": 41.5,
+      "x": 49.66,
       "y": -19.465333333333433,
       "z": 0
     }
@@ -683,7 +709,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": 160.5,
+      "x": 168.66,
       "y": -19.465333333333433,
       "z": 0
     }
@@ -976,7 +1002,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": 262.5,
+      "x": 270.65999999999997,
       "y": -19.465333333333433,
       "z": 0
     }
@@ -1302,7 +1328,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": 364.5,
+      "x": 372.65999999999997,
       "y": -19.465333333333433,
       "z": 0
     }
@@ -1507,7 +1533,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 831,
+      "width": 847.3199999999999,
       "height": 238
     },
     "_anchorPoint": {
@@ -1574,12 +1600,12 @@
     "php_node": {
       "__id__": 3
     },
-    "currencySp": {
-      "__id__": 6
-    },
     "dig_pfb": {
       "__uuid__": "a70dad08-8efc-4165-ba4b-8d0c49d67f7c",
       "__expectedType__": "cc.Prefab"
+    },
+    "currencyLabel": {
+      "__id__": 6
     },
     "number_spf": [
       {

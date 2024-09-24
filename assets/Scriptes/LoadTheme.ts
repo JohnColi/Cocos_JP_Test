@@ -11,7 +11,9 @@ export class LoadTheme extends Component {
     jp_ske_parent: Node;
 
     start() {
+        // @ts-ignore
         window.api = new Object()
+        // @ts-ignore
         window.api.loadGreen = this.Loadbundle.bind(this);
     }
 

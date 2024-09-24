@@ -13,7 +13,9 @@ export class CurrencyRun extends Component {
     runState: eRunState = eRunState.Idle;
     completeCallback: Function = null;
     start() {
+        // @ts-ignore
         window.currency = new Object();
+        // @ts-ignore
         window.currency.clearNumber = this.clearNumber.bind(this);
     }
     setRectData(data: { h, w, rate }) {
